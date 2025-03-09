@@ -1,0 +1,62 @@
+# 文档地址: https://pylint.pycqa.org/en/latest/user_guide/configuration/index.html
+
+[MASTER]
+# 忽略检查的目录
+ignore = tests, venv, migrations
+
+# 加载本地插件（如果有）
+load-plugins =
+    pylint.extensions.mccabe
+
+[MESSAGES CONTROL]
+# 禁用不必要的检查项
+disable =
+    missing-docstring,        # 允许无文档字符串(包括模块,函数等)
+    too-few-public-methods,   # 允许类中公共方法少
+    fixme,                    # 忽略 TODO/FIXME 注释
+    broad-except,             # 允许捕获宽泛异常
+    global-statement,         # 允许全局变量
+    protected-access,         # 允许访问 protected 成员
+    duplicate-code,            # 允许重复代码（企业级项目建议启用）
+
+# 启用高优先级检查
+enable =
+    design,
+    refactoring,
+    format
+
+[FORMAT]
+# 最大行长度
+max-line-length = 120
+
+
+[DESIGN]
+# 最大函数参数数量
+max-args = 5
+
+# 最大函数局部变量数量
+max-locals = 15
+
+# 最大类继承层级
+max-parents = 3
+
+# 最大公共方法数量
+max-public-methods = 15
+
+[REFACTORING]
+# 最大嵌套块层级
+max-nested-blocks = 4
+
+# 最大返回分支数量
+max-returns = 6
+
+[TYPECHECK]
+# 启用类型注解检查
+generated-members = requests.models.Response
+
+[METRICS]
+# 最大函数复杂度（McCabe 复杂度）
+max-complexity = 15
+
+# 最小代码行数（低于此值的函数不检查复杂度）
+min-similarity-lines = 10

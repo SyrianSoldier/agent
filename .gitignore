@@ -1,15 +1,15 @@
 # 通用忽略规则
-*/node_modules
 *.log
 *.env
 .DS_Store
 dist/
 build/
+.vscode
 
 # 可选：前端特定忽略（如前端编译产物）
-frontend/.cache
-frontend/out
+*/node_modules
 
 # 可选：后端特定忽略（如后端编译产物）
-backend/target
-backend/*.jar
+*.pyc  
+*/venv
+.mypy_cache

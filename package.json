@@ -1,0 +1,10 @@
+{
+  "name": "shell",
+  "version": "1.0.0",
+  "description": "快速启动项目的脚本",
+  "scripts": {
+    "dev:backend": "cd backend && . venv/Scripts/activate",
+    "dev:frontend": "cd frontend &&  npm run dev",
+    "dev": "npm run dev:frontend & npm run dev:backend"
+  }
+}
