@@ -4,11 +4,3 @@
 .DS_Store
 dist/
 build/
-
-# 可选：前端特定忽略（如前端编译产物）
-*/node_modules
-
-# 可选：后端特定忽略（如后端编译产物）
-*.pyc  
-*/venv
-.mypy_cache
