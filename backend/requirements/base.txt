@@ -1,1 +1,8 @@
 tornado>=6.1
+
+# 可以从json快速构建dataclass
+dataclass-wizard==0.35.0
+
+# agent框架langgraph
+langgraph==0.3.11
+langchain==0.3.20

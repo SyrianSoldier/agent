@@ -1,0 +1,75 @@
+{
+  "metadata": {
+    "name": "template",
+    "version": "1.0.0",
+    "description": "flow构建测试模板"
+  },
+  "nodes": [
+    {
+      "id": "START_1a2b3c4d5e6f",
+      "type": "START",
+      "name": "开始节点",
+      "inputs": [
+        {
+          "name": "user_input",
+          "type": "string",
+          "value": "$USER_QUERY"
+        }
+      ],
+      "config": {},
+      "position": {
+        "x": 100,
+        "y": 100
+      }
+    },
+    {
+      "id": "CHAT_1a2b3ced5e6f",
+      "type": "CHAT",
+      "name": "大语言模型",
+      "inputs": [
+        {
+          "name": "query",
+          "type": "string",
+          "value": "$STATE.start.user_input"
+        }
+      ],
+      "config": {
+        "params":{
+          "model":"QwenMax",
+          "api_key": null
+        }
+      },
+      "position": {
+        "x": 300,
+        "y": 100
+      }
+    },
+    {
+      "id": "END_1a2b3ced5e6a",
+      "type": "END",
+      "name": "结束节点",
+      "inputs": [
+        {
+          "name": "output",
+          "type": "string",
+          "value": "$STATE.start.llm"
+        }
+      ],
+      "config": {},
+      "position": {
+        "x": 300,
+        "y": 100
+      }
+    }
+  ],
+  "edges": [
+    {
+      "_from": "START_1a2b3c4d5e6f",
+      "to": "CHAT_1a2b3ced5e6f"
+    },
+    {
+      "_from": "CHAT_1a2b3ced5e6f",
+      "to": "END_1a2b3ced5e6a"
+    }
+  ]
+}

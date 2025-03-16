@@ -3,17 +3,18 @@ import tornado.ioloop
 import tornado.options
 import tornado.web
 import tornado.autoreload
-from typing_extensions import Any
 
+from src.controllers import chat_controller
 from src.controllers import base_controller
+from config.settings import tornado_settings
 
 # 路由表
 routes: tornado.routing._RuleList = [
     (r"/", base_controller.BaseController),
+    (r"/api/chat", chat_controller.ChatController)
 ]
 
-# tornado配置项
-tornado_settings: dict[str, Any] = {"port": 1080}
+
 
 
 # app启动后的欢迎语

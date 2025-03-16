@@ -6,4 +6,7 @@
 pylint==3.3.4
 #mypy: 专注于类型安全，检查类型注解是否正确。相当于ts类型检查
 mypy==1.15.0
-
+# pytest: python代码单元测试
+pytest==8.3.5
+# zoneinfo 是标准库，但 Windows 系统默认不包含时区数据库，需手动安装 tzdata
+tzdata==2025.1
