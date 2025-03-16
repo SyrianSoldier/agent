@@ -29,6 +29,11 @@ export default defineConfig({
       path: '/table',
       component: './Table',
     },
+    {
+      name: '聊天',
+      path: 'chat',
+      component: "./Chat"
+    }
   ],
   npmClient: 'yarn',
 });

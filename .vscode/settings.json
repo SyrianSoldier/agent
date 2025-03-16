@@ -3,4 +3,7 @@
   "mypy-type-checker.cwd": "${workspaceFolder}/backend",
   // 设置pylint的工作区, 将会在这个工作区目录下读取.pylintrc
   "pylint.cwd": "${workspaceFolder}/backend",
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.useLibraryCodeForTypes": true
+
 }
