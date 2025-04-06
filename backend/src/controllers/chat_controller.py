@@ -3,7 +3,7 @@ import tornado.websocket
 import tornado.httputil
 from typing_extensions import  Union, override
 from src.service.chat_service import ChatService
-from config import settings
+from util.env_util import EnvUtil
 
 class ChatController(tornado.websocket.WebSocketHandler):
     def __init__(
@@ -40,4 +40,4 @@ class ChatController(tornado.websocket.WebSocketHandler):
 
     @override
     def check_origin(self, origin: str) -> bool:
-        return origin in settings.ALLOWED_ORIGINS
+        return origin in EnvUtil.get_cur_env_config().get("allowed_origins")
