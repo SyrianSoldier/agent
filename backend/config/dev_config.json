@@ -1,0 +1,12 @@
+{
+  "database": {
+    "user": "root",
+    "password": null,
+    "host": null,
+    "port":null
+  },
+  "server":{
+    "host": "待定",
+    "port": 1080
+  }
+}

@@ -6,3 +6,10 @@ dataclass-wizard==0.35.0
 # agent框架langgraph
 langgraph==0.3.11
 langchain==0.3.20
+
+#db&orm
+peewee==3.17.9
+pymysql==1.1.1
+
+# logger
+python-json-logger==3.3.0

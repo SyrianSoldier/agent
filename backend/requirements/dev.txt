@@ -10,3 +10,5 @@ mypy==1.15.0
 pytest==8.3.5
 # zoneinfo 是标准库，但 Windows 系统默认不包含时区数据库，需手动安装 tzdata
 tzdata==2025.1
+# 用于开发时向控制台输出带有颜色的日志
+colorlog==6.9.0
