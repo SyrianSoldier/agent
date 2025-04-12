@@ -1,0 +1,63 @@
+{
+  "log_color": null,
+  "asctime": "2025-04-06 16:23:24",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 55,
+  "message": "cur_env_config={'allowed_origins': ['http://localhost:8000'], 'database': {'user': 'root', 'password': None, 'host': None, 'port': None}, 'server': {'host': 'localhost', 'port': 1080}}"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-06 16:24:28",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 55,
+  "message": "cur_env_config={'allowed_origins': ['http://localhost:8000'], 'database': {'user': 'root', 'password': None, 'host': None, 'port': None}, 'server': {'host': 'localhost', 'port': 1080}}"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-06 16:24:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 56,
+  "message": "cur_env_config={'allowed_origins': ['http://localhost:8000'], 'database': {'user': 'root', 'password': None, 'host': None, 'port': None}, 'server': {'host': 'localhost', 'port': 1080}}"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-06 16:25:18",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 56,
+  "message": "cur_env_config={'allowed_origins': ['http://localhost:8000'], 'database': {'user': 'root', 'password': None, 'host': None, 'port': None}, 'server': {'host': 'localhost', 'port': 1080}}"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-06 16:25:18",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 37,
+  "message": "Server started in http://localhost:1080"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-06 16:28:13",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 54,
+  "message": "cur_env_config={'allowed_origins': ['http://localhost:8000'], 'database': {'user': 'root', 'password': None, 'host': None, 'port': None}, 'server': {'host': 'localhost', 'port': 1080}}"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-06 16:28:13",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 35,
+  "message": "Server started in http://localhost:1080"
+}

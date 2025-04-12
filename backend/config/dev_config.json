@@ -6,7 +6,7 @@
     "port":null
   },
   "server":{
-    "host": "待定",
+    "host": "localhost",
     "port": 1080
   }
 }

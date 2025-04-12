@@ -3,7 +3,7 @@ import tornado.websocket
 import tornado.httputil
 from typing_extensions import  Union, override
 from src.service.chat_service import ChatService
-from util.env_util import EnvUtil
+from src.util.env_util import EnvUtil
 
 class ChatController(tornado.websocket.WebSocketHandler):
     def __init__(
