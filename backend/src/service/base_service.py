@@ -4,12 +4,13 @@ from src.util.common_util import Singleton
 
 
 class BaseService(ABC, Singleton):
-    @abstractmethod
     @classmethod
+    @abstractmethod
     def start(cls) -> None:
-        pass
+        raise NotImplementedError()
 
-    @abstractmethod
+
     @classmethod
+    @abstractmethod
     def end(cls) -> None:
-        pass
+        raise NotImplementedError()

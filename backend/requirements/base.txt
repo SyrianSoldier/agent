@@ -19,3 +19,6 @@ pycparser==2.22
 
 # logger
 python-json-logger==3.3.0
+
+# 异步文件io
+aiofiles==24.1.0

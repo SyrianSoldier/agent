@@ -13,9 +13,11 @@ class ChatService(BaseService):
     def end(cls) -> None:
         pass
 
+    @classmethod
     def on_chat(self, message: str) -> str:
         return "111"
 
+    @classmethod
     def save_chat_history(self, user_message:str, bot_message:str, extra: Dict[str,Any]={}) -> None:
         pass
 

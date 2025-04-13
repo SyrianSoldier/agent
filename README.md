@@ -41,14 +41,16 @@
 | \|- 聊天Node节点开发          |          |      |      |        | 1. 根据选择的模型读取模型配置, 将用户提问透传给大模型<br />2. 支持流式/非流式两种方式 |         |
 |                         |          |      |      |        |                                          |         |
 | **通用接口返回api**           | 后端架构优化一期 | p0   |      |        |                                          |         |
-| \|- CRUD通用返回api         |          |      |      |        |                                          | **ing** |
+| \|- CRUD通用返回api         |          |      |      |        |                                          | √       |
 | \|- class和`dict`的自动双向映射 |          |      |      |        | 这个api可以<br />1. 接收更新,新增接口的dict, 转换成指定的实体类(可以是dataclass, peewee的模型类) (JSONwirezied可以实现吗)<br />2. return_success时候自动将实体类转成dict<br />3. api就叫做 class_instance_to_dict 和 dict_to_class_instance | **ing** |
 | **程序异步化改造**             | 后端架构优化一期 | p0   |      |        |                                          |         |
-| \|- web请求异步             |          |      |      |        | 接口改为使用`async`<br />( Tornado 的 `RequestHandler` 从 **5.0 版本**开始原生支持 `async/await` 语法) | ×       |
-| \|- 数据库异步               |          |      |      |        | 使用`peewee-async`                         | ×       |
-| \|- 网络异步                |          |      |      |        | 增加`httpx`依赖, 取代`requests`                | ×       |
-| \|- main函数异步            |          |      |      |        | `asyncio` 运行`main`函数                     |         |
-| \|- 封装pewee异步化`sql` API |          |      |      |        | `async_get_or_none()` `async_execute()` `async_execute()` |         |
+| \|- web请求异步             |          |      |      |        | 接口改为使用`async`<br />( Tornado 的 `RequestHandler` 从 **5.0 版本**开始原生支持 `async/await` 语法) | √       |
+| \|- 数据库异步               |          |      |      |        | 使用`peewee-async`                         | √       |
+| \|- 网络异步                |          |      |      |        | 增加`httpx`依赖, 取代`requests`                | √       |
+| \|- main函数异步            |          |      |      |        | `asyncio` 运行`main`函数                     | √       |
+| \|- 封装pewee异步化`sql` API |          |      |      |        | `async_get_or_none()` `async_execute()` `async_execute()` | √       |
+| \|- 文件IO异步              |          |      |      |        | `安装依赖aiofiles`                           | √       |
+| \|- 异步日志                |          |      |      |        | 单线程 + 队列实现                               | √       |
 |                         |          |      |      |        |                                          |         |
 | **日志系统改造**              | 后端架构优化一期 | p2   | ⭐⭐   |        |                                          |         |
 |                         |          |      |      |        | 性能日志集成到`baseController`中, 统计每个接口响应时间     |         |
@@ -56,4 +58,8 @@
 |                         |          |      |      |        | 第三方库的`logger`要集成到logger里<br /><br />`2025-04-06 16:10:20 [DEBUG] asyncio:proactor_events.py:633 - Using proactor: IocpProactor`<br /><br />`2025-04-06 16:10:20 [ERROR] tornado.application:ioloop.py:770 - Exception in callback functools.partial(<function app_started_welcome at 0x00000200FA268AE0>)`<br /><br />这两条应该集成到自己的日志里 |         |
 |                         |          |      |      |        |                                          |         |
 | **sentry集成前后端日志**       | 后端架构优化二期 | p3   | ⭐⭐⭐⭐ |        |                                          |         |
+
+
+
+
 

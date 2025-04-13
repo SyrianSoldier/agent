@@ -1,17 +1,16 @@
-from typing_extensions import  TypeVar, Generic, Optional, TypedDict
+from typing_extensions import TypedDict, Any
 
-DataType = TypeVar('DataType')
 
-class ResponseType(TypedDict, Generic[DataType]):
+class ResponseType(TypedDict):
     code: int
     success: bool
     message: str
-    data: Optional[DataType]
+    data: Any
 
 
-class ApiResponse(Generic[DataType]):
+class ApiResponse():
     @classmethod
-    def success(cls, data: Optional[DataType] = None, message: str = "success", code: int = 200) -> ResponseType[DataType]:
+    def success(cls, data: Any = None, message: str = "success", code: int = 200) -> ResponseType:
         return {
             "code":code,
             "message": message,
@@ -20,7 +19,7 @@ class ApiResponse(Generic[DataType]):
         }
 
     @classmethod
-    def failed(cls, data: Optional[DataType] , message: str = "failed", code: int = 400) -> ResponseType[DataType]:
+    def failed(cls, data: Any , message: str = "failed", code: int = 400) -> ResponseType:
         return {
             "code":code,
             "message": message,

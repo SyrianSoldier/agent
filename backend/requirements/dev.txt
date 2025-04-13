@@ -12,3 +12,5 @@ pytest==8.3.5
 tzdata==2025.1
 # 用于开发时向控制台输出带有颜色的日志
 colorlog==6.9.0
+# aio-files的类型文件
+types-aiofiles=24.1.0.20250326
