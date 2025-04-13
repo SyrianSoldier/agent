@@ -26,6 +26,17 @@ class LoggerEnum(Enum):
 
 
 class LogService(BaseService):
+    @override
+    @classmethod
+    def start(cls) -> None:
+        cls.init_log()
+
+
+    @override
+    @classmethod
+    def end(cls) -> None:
+        pass
+
     # 快捷方式, 拿取对应logger
     # 错误日志: 记录所有错误和异常堆栈（ERROR及以上级别）, 日志输出到log/error
     error_logger = logging.getLogger(LoggerEnum.ERROR.value)
@@ -91,37 +102,37 @@ class LogService(BaseService):
         },
     }
 
-    @override
-    def start(self) -> None:
-        self.init_log()
 
-    @override
-    def end(self) -> None:
-        pass
-
-    def get_default_console_log_formatter(self) -> colorlog.ColoredFormatter:
+    @classmethod
+    def get_default_console_log_formatter(cls) -> colorlog.ColoredFormatter:
         return colorlog.ColoredFormatter(
-            self.__class__.LOG_FORMAT,
-            log_colors=self.__class__.LOG_COLORS,
+            cls.LOG_FORMAT,
+            log_colors=cls.LOG_COLORS,
             reset=True,  # 重置颜色（避免影响后续终端输出）
             style="%",  # 使用 % 格式化风格
             secondary_log_colors={},  # 禁用次级颜色
             datefmt="%Y-%m-%d %H:%M:%S",  # 时间格式
         )
 
-    def get_default_json_log_formatter(self) -> jsonlogger.JsonFormatter:  # type: ignore
+
+    @classmethod
+    def get_default_json_log_formatter(cls) -> jsonlogger.JsonFormatter:  # type: ignore
         return jsonlogger.JsonFormatter(  # type: ignore
-            fmt=self.__class__.LOG_FORMAT,  # 根据log_format定义的字段生成json
+            fmt=cls.LOG_FORMAT,  # 根据log_format定义的字段生成json
             # rename_fields={"levelname": "severity", "asctime": "timestamp"}, # 将log_format定义的字段重命名
             datefmt="%Y-%m-%d %H:%M:%S",
             json_indent=2,
             json_ensure_ascii=False,  # 是否转义非 ASCII 字符（中文等建议设为 False）
         )
 
-    def get_default_console_log_handler(self) -> logging.Handler:
+
+    @classmethod
+    def get_default_console_log_handler(cls) -> logging.Handler:
         return logging.StreamHandler(sys.stdout)
 
-    def get_default_time_rotating_log_handler(self, filename: str) -> logging.Handler:
+
+    @classmethod
+    def get_default_time_rotating_log_handler(cls, filename: str) -> logging.Handler:
         return logging.handlers.TimedRotatingFileHandler(
             filename=filename,
             interval=1,
@@ -130,16 +141,19 @@ class LogService(BaseService):
             encoding="utf-8",
         )
 
-    def clean_logger_all_handler(self, logger: logging.Logger) -> None:
+
+    @classmethod
+    def clean_logger_all_handler(cls, logger: logging.Logger) -> None:
         for handler in logger.handlers:
             logger.removeHandler(handler)
 
 
-    def init_log(self) -> None:
-        default_console_log_formatter = self.get_default_console_log_formatter()
-        default_json_log_formatter = self.get_default_json_log_formatter()
+    @classmethod
+    def init_log(cls) -> None:
+        default_console_log_formatter = cls.get_default_console_log_formatter()
+        default_json_log_formatter = cls.get_default_json_log_formatter()
 
-        default_console_log_handler = self.get_default_console_log_handler()
+        default_console_log_handler = cls.get_default_console_log_handler()
         default_console_log_handler.setFormatter(default_console_log_formatter)
 
         # 给根logger设置属性, 子logger会继承属性
@@ -151,15 +165,15 @@ class LogService(BaseService):
         # 单独为其他logger设置
         logger_enum: LoggerEnum
         logger_config: LoggerConfigType
-        for logger_enum, logger_config in self.__class__.LOGGER_CONFIG.items():
+        for logger_enum, logger_config in cls.LOGGER_CONFIG.items():
             logger_dir: str = os.path.join(
-                self.LOG_ROOT_DIR, logger_config.get("dir_suffix", "")
+                cls.LOG_ROOT_DIR, logger_config.get("dir_suffix", "")
             )
 
             os.makedirs(logger_dir, exist_ok=True)
 
             default_time_rotating_log_handler = (
-                self.get_default_time_rotating_log_handler(
+                cls.get_default_time_rotating_log_handler(
                     os.path.join(logger_dir, logger_config.get("filename", ""))
                 )
             )

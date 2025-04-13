@@ -1,6 +1,7 @@
 import tornado.ioloop
 import tornado.web
 import asyncio
+from tornado.platform.asyncio import AsyncIOMainLoop
 
 from typing_extensions import List,Type, Any, Dict
 
@@ -26,41 +27,58 @@ services:List[Type[BaseService]] = [
 ]
 
 
-# app启动后的欢迎语
-def app_started_welcome() -> None:
-    cur_env_server_config = EnvUtil.get_cur_env_config().get("server")
-    host = cur_env_server_config.get("host", "localhost") #type: ignore
-    port = cur_env_server_config.get("port", 1080)        #type: ignore
-
-    LogService.runtime_logger.info(f"Server started in http://{host}:{port}")
-    print(f"Server started in http://{host}:{port}")
-
 
 class TornadoApplication(tornado.web.Application):
     def __init__(self) -> None:
         tornado.web.Application.__init__(self, routes)
 
 
-def init_service() -> None:
+async def init_service() -> None:
     for Service in services:
-        Service().start()
+        Service.start()
 
 
-def main() -> None:
-    # 初始化所有服务
-    init_service()
 
-    # 获取当前环境配置对象
+async def init_tornado_server() -> None:
+      # 获取当前环境配置对象
     cur_env_config = EnvUtil.get_cur_env_config()
     LogService.runtime_logger.info(f"{cur_env_config=}")
 
     # 启动tornando
     app = TornadoApplication()
     app.listen(cur_env_config.get("server",{}).get("port"))
-    ioloop = tornado.ioloop.IOLoop.current()
-    ioloop.add_callback(callback=app_started_welcome)
-    ioloop.start()
 
+
+
+async def app_started_welcome() -> None:
+    cur_env_server_config = EnvUtil.get_cur_env_config().get("server")
+    host = cur_env_server_config.get("host", "localhost") #type: ignore
+    port = cur_env_server_config.get("port", 1080)        #type: ignore
+
+    LogService.runtime_logger.info(f"Server started in http://{host}:{port}")
+
+
+
+async def init_asyncio_loop() -> None:
+    """让 Tornado 使用 asyncio 的事件循环。
+       实现 Tornado 与 asyncio 代码(以及基于aio的三方库,如peewee-async等)的无缝协作。
+    """
+    AsyncIOMainLoop().install()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(app_started_welcome())
+
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        LogService.runtime_logger.info("Server good bye~")
+
+
+
+async def main() -> None:
+    # 初始化所有服务
+    await init_service()
+    await init_tornado_server()
+    await init_asyncio_loop()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

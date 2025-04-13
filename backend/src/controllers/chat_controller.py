@@ -40,4 +40,4 @@ class ChatController(tornado.websocket.WebSocketHandler):
 
     @override
     def check_origin(self, origin: str) -> bool:
-        return origin in EnvUtil.get_cur_env_config().get("allowed_origins")
+        return origin in EnvUtil.get_cur_env_config().get("allowed_origins") #type: ignore

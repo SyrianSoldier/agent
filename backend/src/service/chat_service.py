@@ -4,11 +4,13 @@ from src.service.base_service import BaseService
 
 class ChatService(BaseService):
     @override
-    def start(self) -> None:
+    @classmethod
+    def start(cls) -> None:
         pass
 
     @override
-    def end(self) -> None:
+    @classmethod
+    def end(cls) -> None:
         pass
 
     def on_chat(self, message: str) -> str:

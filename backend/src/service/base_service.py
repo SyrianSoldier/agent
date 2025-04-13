@@ -5,9 +5,11 @@ from src.util.common_util import Singleton
 
 class BaseService(ABC, Singleton):
     @abstractmethod
-    def start(self) -> None:
+    @classmethod
+    def start(cls) -> None:
         pass
 
     @abstractmethod
-    def end(self) -> None:
+    @classmethod
+    def end(cls) -> None:
         pass

@@ -1,32 +1,29 @@
-import json
-from typing import Any, TypeVar, Generic, Optional, TypedDict
+from typing_extensions import  TypeVar, Generic, Optional, TypedDict
 
-T = TypeVar('T')
+DataType = TypeVar('DataType')
 
-class ResponseType(TypedDict):
-    status_code: int
-    succcess: bool
+class ResponseType(TypedDict, Generic[DataType]):
+    code: int
+    success: bool
     message: str
-    data: Any
+    data: Optional[DataType]
 
-class ApiResponse(Generic[T]):
-    @staticmethod
-    def success(message: str = "Success", data: Optional[T] = None, status_code: int = 200) -> str:
-        response:ResponseType = {
-            "succcess":True,
+
+class ApiResponse(Generic[DataType]):
+    @classmethod
+    def success(cls, data: Optional[DataType] = None, message: str = "success", code: int = 200) -> ResponseType[DataType]:
+        return {
+            "code":code,
             "message": message,
             "data": data,
-            "status_code": status_code
+            "success":True
         }
 
-        return json.dumps(response)
-
-    @staticmethod
-    def error(message: str = "Error", data: Optional[T] = None, status_code: int = 400) -> str:
-        response:ResponseType = {
-            "succcess":False,
+    @classmethod
+    def failed(cls, data: Optional[DataType] , message: str = "failed", code: int = 400) -> ResponseType[DataType]:
+        return {
+            "code":code,
             "message": message,
             "data": data,
-            "status_code": status_code
+            "success":False
         }
-        return json.dumps(response)

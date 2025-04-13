@@ -1,22 +1,20 @@
-from peewee import MySQLDatabase, Model,SQL,DateTimeField
-import datetime
-# TODO 把配置信息抽到config目录中
-# TODO:添加数据库连接池
-# TODO:Redis缓存层
-# TODO: 集成Prometheus监控
-# TODO: API文档生成（OpenAPI 3.0）使用apistar生成文档
-# TODO: 安装peewee-stubs为peewee添加类型提示
-db = MySQLDatabase(
-    database="agent",
-    host="localhost",
-    port = 3306,
-    user="root",
-    password="1234"
-)
+from peewee import SQL, DateTimeField
+import peewee_async
+from typing_extensions import Dict, Any
+from src.util.env_util import EnvUtil
 
-class BaseModel(Model): # type: ignore[misc]
+db_config:Dict[str, Any] = EnvUtil.get_cur_env_config().get("database") #type:ignore[assignment]
+db = peewee_async.PooledMySQLDatabase(**db_config)
+
+
+class BaseModel(peewee_async.AioModel): #type:ignore[misc]
     created_at = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP")])
-    updated_at = DateTimeField(constraints=[SQL("DEFAULT CURRENT_TIMESTAMP"),SQL('ON UPDATE CURRENT_TIMESTAMP') ])
+    updated_at = DateTimeField(
+        constraints=[
+            SQL("DEFAULT CURRENT_TIMESTAMP"),
+            SQL("ON UPDATE CURRENT_TIMESTAMP"),
+        ]
+    )
 
     class Meta:
         database = db

@@ -14,11 +14,14 @@ from src.types.graph_type import State
 
 class FlowService(BaseService):
     @override
-    def start(self) -> None:
+    @classmethod
+    def start(cls) -> None:
         pass
 
+
     @override
-    def end(self) -> None:
+    @classmethod
+    def end(cls) -> None:
         pass
 
 
