@@ -1,4 +1,4 @@
-from typing import Any, Dict,List
+from typing import Any
 from typing_extensions import override
 
 from langgraph.graph import StateGraph
@@ -7,21 +7,23 @@ from langgraph.graph.state import CompiledStateGraph
 from src.constants.node_type import NodeType
 from src.nodes.base_node import BaseNode
 from src.nodes.node_factory import NodeFactory
-from src.models.domain.graph import Graph,Node,Edge, NodeInputItem, NodeOutput
+from src.domain.po.graph_po import Graph, Node, Edge, NodeInputItem, NodeOutput
 from src.service.base_service import BaseService
-from src.types.graph_type import State
-
+from src.domain.po.graph_po import State
+from src.service.log_service import LogService
 
 class FlowService(BaseService):
     @override
     @classmethod
-    def start(cls) -> None:
+    @LogService.service_runtime_log(__name__, type_="start")
+    async def start(cls) -> None:
         pass
 
 
     @override
     @classmethod
-    def end(cls) -> None:
+    @LogService.service_runtime_log(__name__, type_="end")
+    async def end(cls) -> None:
         pass
 
 
@@ -30,7 +32,8 @@ class LangGraphBuilder:
     def __init__(self):
         self.langgraph:StateGraph = StateGraph(State)
 
-    def node_reducer_factory(self, node_type:NodeType, node_id:str, node_inputs:List[NodeInputItem]) -> State:
+
+    def node_reducer_factory(self, node_type:NodeType, node_id:str, node_inputs:list[NodeInputItem]) -> State:
         def reducer(state:State):
             """图状态的reducer函数,请保持此函数是纯函数"""
             node_ins:BaseNode = NodeFactory.get_node_by_type(node_type)
@@ -45,7 +48,8 @@ class LangGraphBuilder:
             return state
         return reducer
 
-    def _build_nodes(self, nodes: List[Node]) -> None:
+
+    def _build_nodes(self, nodes: list[Node]) -> None:
         for node in nodes:
             if node.type is NodeType.START:
                 self.langgraph.set_entry_point(node.id)
@@ -54,11 +58,13 @@ class LangGraphBuilder:
 
             self.langgraph.add_node(node.id, self.node_reducer_factory(node.type,node.id,node.inputs))
 
-    def _build_edges(self,edges: List[Edge]) -> None:
+
+    def _build_edges(self,edges: list[Edge]) -> None:
         for edge in edges:
             self.langgraph.add_edge(edge._from, edge.to)
 
-    def build_from_json(self, graph_json_dict: Dict[str, Any]) -> CompiledStateGraph:
+
+    def build_from_json(self, graph_json_dict: dict[str, Any]) -> CompiledStateGraph:
         try:
             user_graph:Graph = Graph.from_dict(graph_json_dict)
         except ValueError as e:

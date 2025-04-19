@@ -2,15 +2,16 @@ import logging
 import queue
 import sys
 import os
+import functools
+import inspect
 import logging.handlers
-from typing import Optional, TypedDict
+from typing import Callable, Optional, TypedDict
 from logging.handlers import QueueHandler, QueueListener
 from enum import Enum
 import colorlog
 from pythonjsonlogger import jsonlogger
-from typing_extensions import override, Dict, List, Any
+from typing_extensions import override, Dict, List, Any, Tuple
 from .base_service import BaseService
-
 
 class LoggerConfigType(TypedDict):
     filename: str  # 日志文件名
@@ -30,13 +31,12 @@ class LoggerEnum(Enum):
 class LogService(BaseService):
     @override
     @classmethod
-    def start(cls) -> None:
+    async def start(cls) -> None:
         cls.init_log()
-
 
     @override
     @classmethod
-    def end(cls) -> None:
+    async def end(cls) -> None:
         # [单线程改造] 停止共享的 QueueListener
         if cls._queue_listener:
             cls._queue_listener.stop()
@@ -121,7 +121,6 @@ class LogService(BaseService):
             datefmt="%Y-%m-%d %H:%M:%S",  # 时间格式
         )
 
-
     @classmethod
     def get_default_json_log_formatter(cls) -> jsonlogger.JsonFormatter:  # type: ignore
         return jsonlogger.JsonFormatter(  # type: ignore
@@ -131,11 +130,9 @@ class LogService(BaseService):
             json_ensure_ascii=False,  # 是否转义非 ASCII 字符
         )
 
-
     @classmethod
     def get_default_console_log_handler(cls) -> logging.Handler:
         return logging.StreamHandler(sys.stdout)
-
 
     @classmethod
     def get_default_time_rotating_log_handler(cls, filename: str) -> logging.Handler:
@@ -149,29 +146,37 @@ class LogService(BaseService):
 
 
     @classmethod
+    def get_self_log_filter(cls, logger:LoggerEnum) -> Callable[[Any], Any]:
+        fn = lambda record, name=logger.value: record.name == name
+        return fn
+
+
+    @classmethod
     def clean_logger_all_handler(cls, logger: logging.Logger) -> None:
         for handler in logger.handlers:
             logger.removeHandler(handler)
-
 
     @classmethod
     def init_log(cls) -> None:
         default_console_log_formatter = cls.get_default_console_log_formatter()
         default_json_log_formatter = cls.get_default_json_log_formatter()
 
-        default_console_log_handler = cls.get_default_console_log_handler()
-        default_console_log_handler.setFormatter(default_console_log_formatter)
-
         # 给根 logger 设置属性，子 logger 会继承属性
-        # 默认所有未单独配置的模块 logger，都只会彩色输出到控制台
+        # 默认所有未单独配置的模块 logger，(比如自定义logger和第三方库的logger)都会彩色输出到控制台
         root_logger: logging.Logger = logging.getLogger()
         root_logger.setLevel(logging.DEBUG)
-        root_logger.addHandler(default_console_log_handler)
+        root_console_log_handler = cls.get_default_console_log_handler()
+        root_console_log_handler.setFormatter(default_console_log_formatter)
+        root_logger.addHandler(root_console_log_handler)
 
-        # [单线程改造] 用于存储所有各 logger 对应的 FileHandler（加了过滤器）
-        file_handlers: List[logging.Handler] = []
 
-        # 为每个预定义的 logger 配置设置
+        # 初始化LoogerEnum中预定义的logger
+        # 采用生产者/消费者模式:
+        #   1. 为每个预定义的logger生成一个Filehandler, 并添加到all_handlers数组中
+        #   2. 所有预定义的logger生产的日志全部推到队列中
+        #   3. 开启一个线程,将每一条日志推送给自己对应的handler处理
+        all_handlers: List[logging.Handler] = []
+
         for logger_enum, logger_config in cls.LOGGER_CONFIG.items():
             logger_dir: str = os.path.join(
                 cls.LOG_ROOT_DIR, logger_config.get("dir_suffix", "")
@@ -179,17 +184,24 @@ class LogService(BaseService):
 
             os.makedirs(logger_dir, exist_ok=True)
 
-            # 创建文件处理器
+            self_log_self_filter = cls.get_self_log_filter(logger_enum)
+
+            # 创建轮转输出到文件的处理器
             fh = cls.get_default_time_rotating_log_handler(
                 os.path.join(logger_dir, logger_config.get("filename", ""))
             )
             fh.setFormatter(default_json_log_formatter)
-            # 添加过滤器，仅处理属于自己的日志记录
+            fh.addFilter(self_log_self_filter)
+            all_handlers.append(fh)
 
-            filter = lambda record, name=logger_enum.value: record.name == name
-            fh.addFilter(filter)
 
-            file_handlers.append(fh)
+            # RUNTIME logger需要再输出到控制台一份
+            if logger_enum == LoggerEnum.RUNTIME:
+                console_log_handler = cls.get_default_console_log_handler()
+                console_log_handler.setFormatter(default_console_log_formatter)
+                console_log_handler.addFilter(self_log_self_filter)
+                all_handlers.append(console_log_handler)
+
 
             # 获取对应 logger 并设置级别，不再直接添加文件处理器到该 logger
             logger = logging.getLogger(logger_enum.value)
@@ -202,13 +214,28 @@ class LogService(BaseService):
 
         # QueueListener的逻辑是,每取出一条记录,交给所有的file_handlers处理
         # 然后每个file_handler中绑定了过滤器,确保file_handler只处理数据自己的记录
-        cls._queue_listener = QueueListener(cls._log_queue, *file_handlers)
+        cls._queue_listener = QueueListener(cls._log_queue, *all_handlers)
         cls._queue_listener.start()
 
 
-if __name__ == "__main__":
-    LogService.start()
+    @classmethod
+    def service_runtime_log(
+        cls, service_name: str, /, *, type_: str
+    ) -> Callable[[Any], Any]:
+        def derector(func: Callable[[Any], Any]) -> Callable[[Any], Any]:
+            @functools.wraps(func)
+            async def wrapper(*args: Tuple[Any], **kwargs: Dict[str, Any]) -> Any:
+                cls.runtime_logger.info(f"{service_name} {type_}ing...")
+                result = await func(*args, **kwargs)
+                cls.runtime_logger.info(f"{service_name} {type_}ed...")
+                return result
 
+            return wrapper
+
+        return derector
+
+
+if __name__ == "__main__":
     # 错误日志Demo
     try:
         # 模拟数据库连接失败

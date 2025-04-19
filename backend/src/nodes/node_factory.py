@@ -1,4 +1,3 @@
-from typing_extensions import Dict
 
 from src.constants.node_type import NodeType
 
@@ -9,7 +8,7 @@ from src.nodes.chat_node import ChatNode
 
 
 class NodeFactory:
-    NodeMap: Dict[NodeType, BaseNode] = {
+    NodeMap: dict[NodeType, BaseNode] = {
         NodeType.START: StartNode,
         NodeType.END: EndNode,
         NodeType.CHAT: ChatNode,

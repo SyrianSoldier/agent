@@ -1,39 +1,39 @@
-from typing import Optional
 from peewee_async import AioModel
-from typing_extensions import override, List, Type, Any
+from typing_extensions import override, Any
 from peewee import Model
-from src.models.database.base_model import db
-from src.models.database.session_model import SessionModel
+from src.domain.model.base_model import db
 from .base_service import BaseService
 from .log_service import LogService
-
-
-TABLES: List[Type[Model]] = [SessionModel]
+from src.service.log_service import LogService
 
 
 class DBService(BaseService):
+    TABLES: list[type[Model]] = []
+
     @override
     @classmethod
-    def start(cls) -> None:
-        cls.init_db()
+    @LogService.service_runtime_log(__name__, type_="start")
+    async def start(cls) -> None:
+        await cls.init_db()
 
 
     @override
     @classmethod
-    def end(cls) -> None:
+    @LogService.service_runtime_log(__name__, type_="end")
+    async def end(cls) -> None:
         pass
 
 
     @classmethod
-    def init_db(cls) -> None:
-        db.aio_connect()
+    async def init_db(cls) -> None:
+        await db.aio_connect()
         LogService.runtime_logger.info("Mysql database connect susccess")
         # safe=True: 有表不创建，没表再创建
-        db.create_tables(TABLES, safe=True)
+        db.create_tables(cls.TABLES, safe=True)
 
 
     @classmethod
-    async def async_get_or_none(cls, aio_model:AioModel) -> Optional[AioModel]:
+    async def async_get_or_none(cls, aio_model:AioModel) -> AioModel | None:
         """用于详情接口
         """
         return await aio_model.aio_get_or_none()

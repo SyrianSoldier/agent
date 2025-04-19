@@ -1,7 +1,7 @@
 import json
 from langgraph.graph.state import CompiledStateGraph
 from src.service.flow_service import LangGraphBuilder
-from src.types.graph_type import State
+from src.domain.po.graph_po import State
 from src.constants.node_type import NodeType
 
 class TestFlowService:

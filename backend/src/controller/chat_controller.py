@@ -1,7 +1,7 @@
 from typing import Any
 import tornado.websocket
 import tornado.httputil
-from typing_extensions import  Union, override
+from typing_extensions import override
 from src.service.chat_service import ChatService
 from src.util.env_util import EnvUtil
 
@@ -27,7 +27,7 @@ class ChatController(tornado.websocket.WebSocketHandler):
         pass
 
     @override
-    def on_message(self, message: Union[str, bytes]) -> None:
+    def on_message(self, message: str | bytes) -> None:
         if isinstance(message, str):
             bot_message:str = ChatService().on_chat(message)
             ChatService().save_chat_history(user_message=message, bot_message=bot_message)

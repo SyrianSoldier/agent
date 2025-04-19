@@ -1,10 +1,11 @@
 import uuid
-from typing import Any, Dict, List, Optional
 
 from dataclasses import dataclass, field
 from dataclass_wizard import JSONWizard
 
 from src.constants.node_type import NodeType
+from typing_extensions import TypedDict, Any
+
 
 @dataclass
 class Position(JSONWizard):
@@ -52,7 +53,7 @@ class NodeConfig(JSONWizard):
     # 最大重试次数
     max_retries: int = 3
     # 每个节点的自定义参数（JSON格式）
-    params: Dict[str, Any] = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -68,11 +69,11 @@ class Node(JSONWizard):
     # 节点位置信息
     position: Position
     # 输入配置
-    inputs: List[NodeInputItem] = field(default_factory=list)
+    inputs: list[NodeInputItem] = field(default_factory=list)
     # 节点配置参数
     config: NodeConfig = field(default_factory=NodeConfig)
     # 节点描述
-    description: Optional[str] = None
+    description: str | None = None
 
     # @classmethod
     # def _pre_from_dict(cls, o: JSONObject) -> JSONObject:
@@ -97,7 +98,7 @@ class GraphMetadata(JSONWizard):
 
     name: str = "langgraph builder json"
     version: str = "1.0.0"
-    description: Optional[str] = None
+    description: str | None = None
 
 
 @dataclass
@@ -106,6 +107,29 @@ class Graph(JSONWizard):
     完整的图定义, 对应json格式可参考tests/resource/flow_template.json
     """
 
-    nodes: List[Node]
-    edges: List[Edge]
+    nodes: list[Node]
+    edges: list[Edge]
     metadata: GraphMetadata = field(default_factory=GraphMetadata)
+
+
+
+class State(TypedDict):
+    """
+    流程状态容器
+
+
+    result:{
+        <NodeType>_<uuid>: {
+            node_type: 节点的NodeType,
+            value: 真正的节点输出数据,
+            node_id: <NodeType>_<uuid>
+        }
+
+        ...
+    }
+    """
+
+    # 记录每个节点的执行结果. 格式: {节点id: 该节点的输出}
+    result: dict[str, Any]
+    # 记录用户的输入
+    query: str

@@ -1,9 +1,5 @@
-import inspect
-import peewee
-from typing import Optional, Type
+from typing import Any
 import tornado.web
-from dataclasses import is_dataclass, fields
-from typing_extensions import Generic, Any, Dict
 from src.util.api_response import ApiResponse
 from src.constants.status_code import HTTPStatusCode, BizStatusCode
 

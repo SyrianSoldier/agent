@@ -1,3 +1,37 @@
-# This file is here because many Platforms as a Service look for
-#	requirements.txt in the root directory of a project.
--r requirements/prod.txt
+tornado>=6.1
+
+# 可以从json快速构建dataclass
+dataclass-wizard==0.35.0
+
+# agent框架langgraph
+langgraph==0.3.11
+langchain==0.3.20
+
+#db&orm
+peewee==3.17.9
+pymysql==1.1.1
+aiomysql==0.2.0
+cffi==1.17.1
+cryptography==43.0.3
+peewee-async==1.1.0
+pycparser==2.22
+
+
+# logger
+python-json-logger==3.3.0
+
+# 异步文件io
+aiofiles==24.1.0
+
+#pylint: 代码质量检查（风格、错误、复杂度、命名规范等）相当于eslint
+pylint==3.3.4
+#mypy: 专注于类型安全，检查类型注解是否正确。相当于ts类型检查
+mypy==1.15.0
+# pytest: python代码单元测试
+pytest==8.3.5
+# zoneinfo 是标准库，但 Windows 系统默认不包含时区数据库，需手动安装 tzdata
+tzdata==2025.1
+# 用于开发时向控制台输出带有颜色的日志
+colorlog==6.9.0
+# aio-files的类型文件
+types-aiofiles==24.1.0.20250326

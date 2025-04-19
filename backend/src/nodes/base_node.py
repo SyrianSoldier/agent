@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable
 from typing_extensions import List
 
-from src.models.domain.graph import NodeOutput, NodeInputItem
-from src.types.graph_type import State
+from src.domain.po.graph_po import NodeOutput, NodeInputItem
+from src.domain.po.graph_po import State
 from src.constants.input_value_alias import InputValueAlias
 
 
