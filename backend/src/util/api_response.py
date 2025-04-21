@@ -18,6 +18,7 @@ class ApiResponse():
             "success":True
         }
 
+
     @classmethod
     def failed(cls, data: Any , message: str = "failed", code: int = 400) -> ResponseType:
         return {

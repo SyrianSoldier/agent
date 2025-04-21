@@ -1,0 +1,450 @@
+{
+  "log_color": null,
+  "asctime": "2025-04-19 15:00:49",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.db_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 15:00:49",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "db_service.py",
+  "lineno": 33,
+  "message": "Mysql database connect susccess"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 15:00:49",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.db_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 15:00:49",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.serssion_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 15:00:49",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.serssion_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 15:00:49",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.chat_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 15:00:49",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.chat_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 15:00:49",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.flow_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 15:00:49",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.flow_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 15:00:49",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 47,
+  "message": "Server started at http://localhost:1080"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:16:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.db_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:16:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "db_service.py",
+  "lineno": 32,
+  "message": "Mysql database connect susccess"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:16:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.db_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:16:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.serssion_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:16:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.serssion_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:16:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.chat_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:16:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.chat_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:16:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.flow_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:16:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.flow_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:16:58",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 47,
+  "message": "Server started at http://localhost:1080"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:19:01",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.db_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:19:01",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "db_service.py",
+  "lineno": 32,
+  "message": "Mysql database connect susccess"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:19:01",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.db_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:19:01",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.serssion_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:19:01",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.serssion_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:19:01",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.chat_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:19:01",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.chat_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:19:01",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.flow_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:19:01",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.flow_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:19:01",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 47,
+  "message": "Server started at http://localhost:1080"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:58:07",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.db_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:58:07",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "db_service.py",
+  "lineno": 31,
+  "message": "Mysql database connect susccess"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:58:07",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.db_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:58:07",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.serssion_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:58:07",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.serssion_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:58:07",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.chat_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:58:07",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.chat_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:58:07",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.flow_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:58:07",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.flow_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 16:58:07",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 47,
+  "message": "Server started at http://localhost:1080"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 17:33:41",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.db_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 17:33:41",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "db_service.py",
+  "lineno": 31,
+  "message": "Mysql database connect susccess"
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 17:33:41",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.db_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 17:33:41",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.serssion_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 17:33:41",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.serssion_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 17:33:41",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.chat_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 17:33:41",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.chat_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 17:33:41",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 228,
+  "message": "src.service.flow_service starting..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 17:33:41",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "log_service.py",
+  "lineno": 230,
+  "message": "src.service.flow_service started..."
+}
+{
+  "log_color": null,
+  "asctime": "2025-04-19 17:33:41",
+  "levelname": "INFO",
+  "name": "RUNTIME",
+  "filename": "main.py",
+  "lineno": 31,
+  "message": "Server started at http://localhost:1080"
+}

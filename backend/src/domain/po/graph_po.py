@@ -36,9 +36,9 @@ class NodeOutput(JSONWizard):
     # 输出的内容
     value: Any
     # 节点id
-    node_id:str = field(default=None)
+    node_id:str | None = field(default=None)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """后初始化处理,生成默认node_id"""
         if self.node_id is None:
             self.node_id = f"{str(self.node_type)}_{uuid.uuid4().hex}"

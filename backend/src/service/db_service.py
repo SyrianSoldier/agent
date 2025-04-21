@@ -5,10 +5,12 @@ from src.domain.model.base_model import db
 from .base_service import BaseService
 from .log_service import LogService
 from src.service.log_service import LogService
-
+from src.domain.model import chat_session_model, user_model, message_history_model
 
 class DBService(BaseService):
-    TABLES: list[type[Model]] = []
+    TABLES: list[type[Model]] = [
+        chat_session_model.ChatSessionModel, user_model.UserModel, message_history_model.MessageHistoryModel
+    ]
 
     @override
     @classmethod
