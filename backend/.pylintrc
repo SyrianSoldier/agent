@@ -17,7 +17,8 @@ disable =
     broad-except,             # 允许捕获宽泛异常
     global-statement,         # 允许全局变量
     protected-access,         # 允许访问 protected 成员
-    duplicate-code,            # 允许重复代码（企业级项目建议启用）
+    duplicate-code,           # 允许重复代码（企业级项目建议启用）
+    wrong-import-order        # import 排序
 
 # 启用高优先级检查
 enable =

@@ -5,8 +5,7 @@ from src.util.api_response import ApiResponse
 from src.constants.status_code import HTTPStatusCode, BizStatusCode
 from src.domain.vo.base_vo import BaseVo
 from src.domain.dto.base_dto import BaseDto
-from src.domain import vo_to_json, json_to_dto
-
+from src.util.bean_util import BeanUtil
 
 type Pagination = dict[
     Literal["pagesize", "pagenum"],
@@ -34,7 +33,7 @@ class BaseController(tornado.web.RequestHandler):
         json_data = (
             data
             if data is None
-            else await vo_to_json(data)
+            else BeanUtil.to_bean(data, dict)
         )
 
         response = ApiResponse.success(data=json_data, code=biz_code, message=message)
@@ -66,7 +65,7 @@ class BaseController(tornado.web.RequestHandler):
 
     async def request_body_to_dto(self, dto_class:type[BaseDto]) -> BaseDto:
         json_data = json.loads(self.request.body.decode("utf-8"))  # 转字典
-        return await json_to_dto(json_data, dto_class)
+        return BeanUtil.to_bean(json_data, dto_class)
 
 
 
