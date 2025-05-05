@@ -36,7 +36,7 @@
 
 ​	3. 下载依赖  pip install -r requirements.txt
 
-​	4. 新增agent数据库
+​	4. 新增 agent 数据库
 
 ​	5. python main.py 启动项目  找到-Server started at http://localhost:1080
 
