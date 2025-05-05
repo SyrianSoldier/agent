@@ -6,6 +6,42 @@
 
 
 
+## 环境安装
+
+###  基本环境
+
+前端:
+
+	- node
+
+后端：
+
+ - python 3.13.3
+ - mysql  5.6.15
+ - navicat
+
+### 安装依赖
+
+前端：
+
+​	1. 下载依赖，yarn
+
+​	2. 启动： npm run dev
+
+后端：
+
+​	1. 安装虚拟环境 python -m venv .venv
+
+​	2. 激活虚拟环境  .venv\Scripts\activate
+
+​	3. 下载依赖  pip install -r requirements.txt
+
+​	4. 新增agent数据库
+
+​	5. python main.py 启动项目  找到-Server started at http://localhost:1080
+
+​	6. 查看数据库表是否自动创建 
+
 ## vscode插件依赖
 
 1. Mypy Type Checker
@@ -26,8 +62,6 @@
 | **前端Vue3改造** | ai聊天 | p0   | ⭐⭐   | 2025-4-12 | 把前端项目改成Vue3+typescript+webpack+vuex的 | √    |
 | **Chat静态页面** | ai聊天 | p0   | ⭐    |           |                                      |      |
 | **Chat页面**   | ai聊天 | P0   | ⭐⭐   |           | 接入后端接口,完成前后端联调                       |      |
-
-
 
 ### 后端需求
 
