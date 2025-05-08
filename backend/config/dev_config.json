@@ -4,7 +4,7 @@
     "host":"localhost",
     "port": 3306,
     "user":"root",
-    "password":"1234",
+    "password":"111111",
     "connect_timeout": 30,
     "pool_params": {"minsize": 0, "maxsize": 5, "pool_recycle": 2}
   },
