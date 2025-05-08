@@ -1,4 +1,12 @@
 from .base_vo import BaseVo
+from dataclasses import dataclass
 
-class ChatSessionListItemVo(BaseVo):
-    pass
+@dataclass
+class ChatSessionVo(BaseVo):
+    gmt_create:str
+    gmt_modified:str
+    title:str
+    uuid:str
+
+
+

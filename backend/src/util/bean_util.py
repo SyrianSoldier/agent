@@ -1,143 +1,219 @@
-import inspect
 import copy
+import dataclasses
+
 from typing import Any
+from .validate_util import ValidateUtil
 
 
 class BeanUtil:
+    @classmethod
+    def get_value(
+        cls,
+        obj: dict[str, Any] | object,
+        key: str,
+        *,
+        default: Any = None,
+        deep_clone: bool = False
+    ) -> Any:
+        """统一获取对象/实例值的方式，并可选择返回深拷贝副本，避免外部修改原值"""
+
+        def get_item_value(
+            obj: dict[str, Any] | object,
+            *,
+            key: str,
+            default: Any = None,
+        ) -> Any:
+            if ValidateUtil.is_dict(obj):
+                return obj.get(key, default)
+
+            if ValidateUtil.is_user_defined_class_ins(obj):
+                return getattr(obj, key, default)
+
+            raise TypeError(
+                "The 'obj' parameter must be either a dictionary or an object instance."
+            )
+
+        if key.strip() == "":
+            raise TypeError(
+                "The key is invalid beacause it shounld't be an empty string."
+            )
+
+        keys:list[str] = key.split(".") # "a.b.c" --> ["a","b","c"]
+        default = copy.deepcopy(default) # 拷贝一份default
+        value = obj
+
+        for k in keys:
+            value = get_item_value(
+                value,
+                key=k,
+                default=None,
+            )
+
+            if value is None:
+                return default
+
+
+        return copy.deepcopy(value) if deep_clone else value
+
 
     @classmethod
-    def to_bean[T, U](cls, from_: T, to: type[U], deep_clone: bool = False) -> U:
-        """
-        将 `from_` 的键值对映射到 `to` 类型的实例。
+    def get_obj_keys(cls, obj: object) -> set[str]:
+        """获取实例/字典的key的方法, 排除私有,保护属性,魔术属性"""
+        if ValidateUtil.is_dict(obj):
+            return {
+                key
+                for key in obj.keys()
+                if ValidateUtil.is_public_key(key)
+            }
 
-        该函数接受一个字典或对象 `from_`，并根据 `from_` 和 `to` 之间的属性交集构造 `to` 类型的实例。它会自动忽略魔术方法、私有属性和受保护属性，确保映射的属性是公开可用的。
+        if ValidateUtil.is_dataclass(obj):
+            return {
+                field.name
+                for field in dataclasses.fields(obj) # type:ignore
+            }
+
+        if ValidateUtil.is_peewee_model(obj):
+            # peewee的原始数据(即实例化时的数据)放在__dict__.__data__里
+            origin_data_dict: dict[str, Any] = cls.get_value(
+                obj,
+                key="__dict__.__data__",
+                default={},
+                deep_clone=True
+            )
+
+
+            return {
+                key
+                for key in origin_data_dict.keys()
+                if ValidateUtil.is_public_key(key)
+            }
+
+        # 普通python对象
+        if isinstance(obj, object) and hasattr(obj, "__dict__"):
+            return {
+                key
+                for key in obj.__dict__.keys()
+                if ValidateUtil.is_public_key(key)
+            }
+
+        raise TypeError(
+            "The 'obj'  must be either a dictionary or an object instance."
+        )
+
+
+    @classmethod
+    def new_instance(
+        cls,
+        clazz: type[object],
+        *args: Any,
+        **kwargs: Any
+    ) -> object:
+        """
+        安全创建实例的工厂方法：
+        1. 优先尝试无参默认构造
+        2. 失败后尝试使用传入的 *args 和 **kwargs 构造
+        3. 全部失败时抛出 InstanceCreationError
+        """
+        first_error, second_error = None, None
+
+        # 优先尝试无参构造
+        try:
+            return clazz()
+        except Exception as e:
+            first_error = e
+
+        # 无参构造失败后，尝试带参构造
+        try:
+            return clazz(*args, **kwargs)
+        except Exception as e:
+            second_error = e
+
+        # 聚合错误信息
+        error_msg = (
+            f"Failed to create instance of {clazz.__name__!r}.\n"
+            f"Attempt 1 (default constructor): {type(first_error).__name__}: {first_error}\n"
+            f"Attempt 2 (with parameters): {type(second_error).__name__}: {second_error}"
+        )
+        raise ValueError(error_msg) from second_error
+
+
+
+    @classmethod
+    def to_bean[T, U](
+        cls,
+        from_: T,
+        to: type[U],
+        deep_clone: bool = False,
+        *init_to_args: Any,
+        **init_to_kwargs: Any
+    ) -> U:
+        """
+        功能:
+        1. **功能**: 将 `from_` 的键值对映射到 `to` 类型的实例。
+        2. 该函数接受一个字典或对象(实例)`from_`，并根据 `from_` 和 `to` 之间的属性交集构造 `to` 类型的实例。
+        3. 它会自动忽略魔术方法、私有属性和受保护属性，确保映射的属性是公开可用的。
 
         注意：
-        - 如果 `to` 是一个类，则会创建该类的实例。
-        - 如果 `to` 是一个类, 则from中必须包含能让to初始化的key-value(可以没有含默认值的参数)
-        - 如果 `to` 是一个字典类型，则返回一个字典，其中包含与 `from_` 属性交集的键值对。
-        - 如果 `from_` 和 `to` 之间有不匹配的属性，将会被忽略。
+        - 如果 `to` 是一个类, 则必须保证创建实例时不包含参数(无参构造), 否则需要通过`init_to_args`, `init_to_kwargs`将构造函数的参数传递进来进行实例化
 
         Args:
             from_ (T): 源对象，可以是字典或对象实例。
-            to (type[U]): 目标类型, 可以是类或dict(类)。
-            deep_clone(bool): 是否以深克隆的方式将from中的属性复制到to.
+            to (type[U]): 目标类型, 目前支持 `普通python class`、`dict`、`字典字面量`。
+            deep_clone(bool): 是否以深克隆的方式将from中的属性复制到to, 默认值为false
 
         Returns:
             U: `to` 类型的实例或字典，包含来自 `from_` 的值。
 
-        Raises:
-            TypeError: 如果 `from_` 不是字典或对象实例，或者 `to` 既不是类也不是字典类型。
-
         Example:
-            # 示例 1: 从字典转换为类实例
-            >>> class Person:
-            >>>     def __init__(self, name, age):
-            >>>         self.name = name
-            >>>         self.age = age
-            >>> person_dict = {"name": "Alice", "age": 25, "gender": "female"}
-            >>> person = to_bean(person_dict, Person)
-            >>> print(person.name, person.age)  # 输出: Alice 25
-            >>> print(person.gender)  # 会抛出 AttributeError，因为 "gender" 不在目标类属性中
-
-            # 示例 2: 从对象实例转换为类实例
-            >>> class Car:
-            >>>     def __init__(self, brand, model):
-            >>>         self.brand = brand
-            >>>         self.model = model
-            >>> car_obj = Car(brand="Toyota", model="Corolla")
-            >>> car_dict = to_bean(car_obj, dict)
-            >>> print(car_dict)  # 输出: {'brand': 'Toyota', 'model': 'Corolla'}
-
-            # 示例 3: 从字典转换为字典
-            >>> source_dict = {"name": "Bob", "age": 30, "_private": "secret", "__init__": "method"}
-            >>> target_dict = {"name": "", "age": 0}
-            >>> merged_dict = to_bean(source_dict, target_dict)
-            >>> print(merged_dict)  # 输出: {'name': 'Bob', 'age': 30}
+            可参考 tests/utils/test_bean_util.py
         """
+        from_keys = cls.get_obj_keys(from_)
+        to_keys: set[str] | None = None
+        to_ins: U | None = None
 
-        def is_special_key(key: str) -> bool:
-            # 魔术方法，如 __init__, __str__ 等
-            if key.startswith("__") and key.endswith("__"):
-                return True
+        if ValidateUtil.is_dict_class(to):
+            to_keys = set()
 
-            # 私有属性，如 __password
-            if key.startswith("__"):
-                return True
+        elif ValidateUtil.is_dict(to):
+            to_keys = cls.get_obj_keys(to)
 
-            # 受保护属性，如 _name
-            if key.startswith("_"):
-                return True
+        elif ValidateUtil.is_user_defined_class(to):
+            to_ins = cls.new_instance(to, *init_to_args, **init_to_kwargs) # type:ignore
 
-            return False
-
-
-        def is_user_defined_class(cls: type) -> bool:
-            return inspect.isclass(cls) and cls.__module__ != "builtins"
-
-
-        def is_dict_class(cls: type) -> bool:
-            return inspect.isclass(cls) and issubclass(cls, dict)
-
-
-        def get_value(
-            obj: dict[str, Any] | object, key: str, default: Any = None
-        ) -> Any:
-            """统一获取对象/实例值的方式，并返回深拷贝副本，避免外部修改原值"""
-            value = None
-
-            if isinstance(obj, dict):
-                value = obj.get(key, default)
-            elif isinstance(obj, object):
-                value = getattr(obj, key, default)
+            if ValidateUtil.is_peewee_model_class(to):
+                to_keys = set(to._meta.fields.keys())
             else:
-                raise TypeError(
-                    "The 'obj' parameter must be either a dictionary or an object instance."
-                )
-
-            return copy.deepcopy(value) if deep_clone else value
+                to_keys = cls.get_obj_keys(to_ins)
 
 
-        def get_from_keys() -> set[str]:
-            if isinstance(from_, dict):
-                return {key for key in from_.keys() if not is_special_key(key)}
+        else:
+            raise TypeError("Parameter 'to' must be an instance of a user-defined class or a dict class or a dictionary.")
 
-            if isinstance(from_, object) and hasattr(from_, "__dict__"):
-                return {key for key in from_.__dict__.keys() if not is_special_key(key)}
-
-            raise TypeError(
-                "The 'from_' parameter must be either a dictionary or an object instance."
-            )
+        keys_intersection:set[str] = from_keys & to_keys
 
 
-        def get_to_keys() -> set[str]:
-            """to支持 dict, {}, 两种方式"""
-            if is_user_defined_class(to) or is_dict_class(to):
-                return get_from_keys()
+        if ValidateUtil.is_dict(to):
+            to_deep_copy: dict[str, Any] = copy.deepcopy(to)
 
-            if isinstance(to, dict):
-                return {key for key in to.keys() if not is_special_key(key)}
+            update_dict: dict[str, Any] = {
+                key: cls.get_value(from_, key, deep_clone=deep_clone)
+                for key in keys_intersection
+            }
 
-            raise TypeError("Parameter 'to' must be a class or a dict instance.")
+            return {
+                **to_deep_copy,
+                **update_dict,
+            }
 
+        if ValidateUtil.is_dict_class(to):
+            return {
+                key: cls.get_value(from_, key, deep_clone=deep_clone)
+                for key in from_keys
+            }
 
-        def create_to_instance() -> U:
-            """根据from和to属性的交集构造to的实例"""
-            from_to_intersection: set[str] = get_from_keys() & get_to_keys()
+        elif ValidateUtil.is_user_defined_class(to) and (to_ins is not None):
+            for key in keys_intersection:
+                setattr(to_ins, key, cls.get_value(from_, key, deep_clone=deep_clone))
+            return to_ins
 
-            if is_user_defined_class(to) or is_dict_class(to):
-                return to(
-                    **{key: get_value(from_, key) for key in from_to_intersection}
-                )
-
-            if isinstance(to, dict):
-                to_deep_copy: dict[str, Any] = copy.deepcopy(to)
-
-                return {
-                    **to_deep_copy,
-                    **{key: get_value(from_, key) for key in from_to_intersection},
-                }
-
-            raise TypeError("Parameter 'to' must be a class or a dict instance.")
-
-        return create_to_instance()
+        raise TypeError("Parameter 'to' must be an instance of a user-defined class or a dict class or a dictionary.")

@@ -5,7 +5,7 @@ from src.service.base_service import BaseService
 services: list[type[BaseService]] = [
     log_service.LogService,
     db_service.DBService,
-    chat_serssion_service.SeesionService,
+    chat_serssion_service.ChatSeesionService,
     chat_service.ChatService,
     flow_service.FlowService
 ]

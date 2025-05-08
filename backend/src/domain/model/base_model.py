@@ -49,6 +49,7 @@ class PeeweeFieldExtend():
 
 class BaseModel(peewee_async.AioModel): #type:ignore[misc]
     """peewee作者非常反感类型注解, 坚决反对,所以peewee没有类型注解, 从2018年到2024依旧如此"
+       peewee的Model可以直接实例化, 字段默认值是None
     """
     id:int = peewee.BigIntegerField(
         primary_key=True,
@@ -69,10 +70,10 @@ class BaseModel(peewee_async.AioModel): #type:ignore[misc]
         verbose_name="创建时间"
     )
 
-    gmt_motified = peewee.DateTimeField(
+    gmt_modified = peewee.DateTimeField(
         null=True,
         constraints=[SQL("DEFAULT CURRENT_TIMESTAMP"), SQL("ON UPDATE CURRENT_TIMESTAMP")],
-        formats="%Y-%m-%d %H:%M:%S.%f",
+        formats="%Y-%m-%d %H:%M:%S",
         verbose_name="更新时间"
     )
 
@@ -81,3 +82,4 @@ class BaseModel(peewee_async.AioModel): #type:ignore[misc]
         # 子表应该实现table_name, 团队约定:必须用snake_case风格
         # table_name = "base_model"
 
+    #TODO: 打印Model时候显示为None, 但实际上有值

@@ -1,3 +1,5 @@
+import pytest
+from src.domain.vo.base_vo import BaseVo
 from src.util.bean_util import BeanUtil
 from src.domain.dto.base_dto import BaseDto
 from src.domain.model.base_model import BaseModel
@@ -5,11 +7,13 @@ import peewee as pw
 from typing import Any
 import unittest
 import datetime
-from dataclasses import dataclass
-
+from dataclasses import dataclass, field
 
 
 class TestBeanUtil(unittest.TestCase):
+    """python -m pytest tests/utils/test_bean_util.py::TestBeanUtil
+    """
+
     def test_from_dict_to_class(self) -> None:
         """测试从字典转换为类实例"""
         class Person:
@@ -18,7 +22,7 @@ class TestBeanUtil(unittest.TestCase):
                 self.age = age
 
         person_dict: dict[str, Any] = {"name": "Alice", "age": 25, "gender": "female"}
-        person = BeanUtil.to_bean(person_dict, Person)
+        person = BeanUtil.to_bean(person_dict, Person, name="", age="")
 
         assert person.name == "Alice"
         assert person.age == 25
@@ -91,19 +95,12 @@ class TestBeanUtil(unittest.TestCase):
 
 
     def test_invalid_from_type(self) -> None:
-        """测试当from_参数不是字典或对象实例时抛出 TypeError"""
-        try:
-            BeanUtil.to_bean("invalid_type", dict)
-        except TypeError as e:
-            assert str(e) == "The 'from_' parameter must be either a dictionary or an object instance."
+        """测试当from_和to参数不是字典或对象实例时抛出 TypeError"""
+        with pytest.raises(TypeError):
+             BeanUtil.to_bean("invalid_type", dict)
 
-
-    def test_invalid_to_type(self) -> None:
-        """测试当to参数既不是类也不是字典类型时抛出 TypeError"""
-        try:
+        with pytest.raises(TypeError):
             BeanUtil.to_bean({}, "invalid_type") # type: ignore
-        except TypeError as e:
-            assert str(e) == "Parameter 'to' must be a class or a dict instance."
 
 
     def test_from_object_to_class(self) -> None:
@@ -114,7 +111,7 @@ class TestBeanUtil(unittest.TestCase):
                 self.model = model
 
         car_obj = Car(brand="Toyota", model="Corolla")
-        car_instance: Car = BeanUtil.to_bean(car_obj, Car)
+        car_instance: Car = BeanUtil.to_bean(car_obj, Car, brand="", model="")
 
         assert isinstance(car_instance, Car)
         assert car_instance.brand == "Toyota"
@@ -129,7 +126,7 @@ class TestBeanUtil(unittest.TestCase):
                 self.age = age
 
         person_dict: dict[str, Any] = {"name": "Alice"}
-        person: Person = BeanUtil.to_bean(person_dict, Person)
+        person: Person = BeanUtil.to_bean(person_dict, Person, name=None)
 
         assert person.name == "Alice"
         assert person.age == 20
@@ -150,101 +147,114 @@ class TestBeanUtil(unittest.TestCase):
 
 
     def test_request_body_to_dto(self) -> None:
-        class UserCreateDto(BaseDto):
-            username: str
-            email: str
-            age: int = 18  # 默认值测试
-            signup_time: str
-
-
         request_data = {
             "username": "john",
             "email": "john@example.com",
-            "signup_time": "2023-01-01T12:00:00"
+            "signup_time": "2023-01-01T12:00:00",
+
+            # 前端可能传超量的数据
+            "other1": "xxxx",
+            "other2": "xxxx",
+            "other3": "xxxx",
+            "other4": "xxxx",
+            "other5": "xxxx"
         }
+        @dataclass
+        class UserCreateDto():
+            username: str|None = None
+            email: str | None = None
+            age: int = 18
+            signup_time: str|None = None
+
+            extra:str|None = None
+
 
         dto = BeanUtil.to_bean(request_data, UserCreateDto)
 
         self.assertIsInstance(dto, UserCreateDto)
         self.assertEqual(dto.username, "john")
+        self.assertEqual(dto.email, "john@example.com")
         self.assertEqual(dto.age, 18)  # 测试默认值
         self.assertEqual(dto.signup_time, "2023-01-01T12:00:00")
+        self.assertEqual(dto.extra, None)
 
 
-    def test_dto_model(self) -> None:
-        class UserCreateDto(BaseDto):
-            username: str
-            email: str
-            age: int = 18  # 默认值测试
-            signup_time: str
+    def test_dto_to_model(self) -> None:
+        @dataclass
+        class UserCreateDto():
+            username:str | None = field(default=None)
+            email:str | None = field(default=None)
+            other:dict[str, Any] = field(default_factory=dict)
 
 
-        # Peewee Model
         class UserModel(BaseModel):
-            user_name = pw.CharField()  # 字段名不一致测试
+            username:str = pw.CharField()
             email = pw.CharField()
-            age = pw.IntegerField(null=True)
+            age = pw.IntegerField(default=18)
             signup_time = pw.DateTimeField()
 
-        # Dataclass VO
-        @dataclass
-        class UserVo:
-            username: str
-            email: str
-            age: int
-            signup_time: datetime.datetime
+            def __str__(self) -> str:
+                return "UserModel(xxx)"
 
         dto = UserCreateDto(
             username="alice",
-            email="alice@example.com",
-            signup_time="2023-01-01T12:00:00"
+            email="alice@example.com"
         )
+        assert dto.username == "alice"
+        assert dto.email == "alice@example.com"
+        self.assertDictEqual(dto.other, {})
 
-        # 测试字段名映射（username -> user_name, signup_time -> created_at）
         model = BeanUtil.to_bean(dto, UserModel)
 
-        self.assertIsInstance(model, UserModel)
-        self.assertEqual(model.user_name, "alice")
-        self.assertEqual(model.signup_time, "2023-01-01T12:00:00")
-        self.assertEqual(model.age, 18)
+        assert model.username == "alice"
+        assert model.email == "alice@example.com"
+        assert model.age == 18
+        assert model.signup_time == None
 
 
     def test_model_to_vo(self) -> None:
-        class UserCreateDto(BaseDto):
-            username: str
-            email: str
-            age: int = 18  # 默认值测试
-            signup_time: str
-
-
-        # Peewee Model
         class UserModel(BaseModel):
-            user_name = pw.CharField()  # 字段名不一致测试
+            username = pw.CharField()
             email = pw.CharField()
-            age = pw.IntegerField(null=True)
+            age = pw.IntegerField(null=True, default=18)
             signup_time = pw.DateTimeField()
 
-        # Dataclass VO
         @dataclass
-        class UserVo:
-            username: str
-            email: str
-            age: int
-            signup_time: datetime.datetime
+        class UserVo(BaseVo):
+            username: str|None = None
+            age: int|None = None
 
         model = UserModel(
-            user_name="bob",
+            username="bob",
             email="bob@example.com",
             signup_time="2023-01-01T12:00:00"
         )
 
+        self.assertEqual(model.id, None)
+        self.assertEqual(model.is_deleted, 0)
+        self.assertEqual(model.username, "bob")
+        self.assertEqual(model.signup_time, "2023-01-01T12:00:00")
+        self.assertEqual(model.id, None)
+
         vo = BeanUtil.to_bean(model, UserVo)
 
-        self.assertEqual(vo.username, "bob")  # 测试字段名转换
-        self.assertEqual(vo.signup_time, datetime.datetime(2023, 3, 1, 14, 30))
-        self.assertEqual(vo.age, 18)  # 测试默认值填充
+        self.assertEqual(vo.username, "bob")
+        self.assertEqual(vo.age, 18)
 
 
     def test_vo_to_request_body(self) -> None:
-        pass
+
+        @dataclass
+        class UserVo:
+            username: str
+            age: int
+            friend_address:str = "hunan"
+
+        vo = UserVo(username="zs", age=18)
+
+        obj = BeanUtil.to_bean(vo, dict)
+
+        assert obj["username"] == "zs"
+        assert obj["age"] == 18
+        assert obj["friend_address"] == "hunan"
 

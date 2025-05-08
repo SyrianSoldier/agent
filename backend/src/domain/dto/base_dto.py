@@ -7,5 +7,5 @@ class BaseDto(pydantic.BaseModel):
 
 
 class PaginationDto(BaseDto):
-    pagesize:  Annotated[int, Field(ge=1)]
-    pagenum: Annotated[int, Field(default=10)]
+    pagesize:  Annotated[int, Field(default=10)]
+    pagenum: Annotated[int, Field(default=1)]

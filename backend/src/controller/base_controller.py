@@ -63,7 +63,7 @@ class BaseController(tornado.web.RequestHandler):
 
 
 
-    async def request_body_to_dto(self, dto_class:type[BaseDto]) -> BaseDto:
+    def request_body_to_dto[T](self, dto_class:type[T]) -> T:
         json_data = json.loads(self.request.body.decode("utf-8"))  # 转字典
         return BeanUtil.to_bean(json_data, dto_class)
 
