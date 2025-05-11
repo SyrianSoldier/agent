@@ -1,13 +1,13 @@
-from peewee_async import AioModel
+from .base_service import BaseService
 from peewee_async.aio_model import AioModelSelect, AioModelUpdate
 from typing import Any
 from src.domain.model.base_model import db, BaseModel
 from src.service.log_service import LogService
 from src.domain.model import chat_session_model, user_model, message_history_model
 from src.util.time_util import TimeUtil
+import peewee
 
-
-class DBService:
+class DBService(BaseService):
     TABLES: list[type[BaseModel]] = [
         chat_session_model.ChatSessionModel,
         user_model.UserModel,
@@ -33,50 +33,47 @@ class DBService:
 
 
     @classmethod
-    async def async_query_detail(cls, query: AioModelSelect) -> BaseModel | None:
+    async def async_query_detail(cls, query: AioModelSelect) -> BaseModel:
         """查询详情（返回单条记录）"""
-        model:BaseModel | None = await query.get_or_none()
-        return model
+        try:
+            model:BaseModel = await query.aio_get()
+            return model
+        except peewee.DoesNotExist as e:
+            assert False, f"查询失败"
 
 
     @classmethod
     async def async_query_list(cls, query: AioModelSelect) -> list[BaseModel]:
         """查询列表（返回多条记录）"""
-        model_list:list[BaseModel] = await query.execute()
+        model_list:list[BaseModel] = await cls.async_execute(query)
+
         return model_list
 
 
     @classmethod
     async def async_insert(cls, model_instance: BaseModel) -> None:
         """插入一条记录"""
-        now = TimeUtil.now_str()
-        model_instance.gmt_create = now
-        model_instance.gmt_modified = now
+        now = TimeUtil.now_utc()
+        model_instance.gmt_modified = now #type: ignore
         await model_instance.aio_save()
 
 
     @classmethod
-    async def async_update(cls, update_sql: AioModelUpdate) -> None:
-        """更新一条记录"""
-        now = TimeUtil.now_str()
-        update_sql = update_sql.dicts().clone()
-        update_sql._update.update({'gmt_modified': now})
+    async def async_update(cls, update_sql: AioModelUpdate) -> int:
+        """更新记录"""
+        now = TimeUtil.now_utc()
+        gmt_modified_field = update_sql.model.gmt_modified
+        update_sql._update.update({gmt_modified_field : now})
         update_rows:int = await cls.async_execute(update_sql)
-
-        # TODO 这里断言, 更新行数不为1就抛异常
-
-    @classmethod
-    async def async_batch_update(cls, update_sql: AioModelUpdate) -> int:
-        """更新多条记录"""
-        # TODO
-        raise NotImplementedError()
-
+        return update_rows
 
 
     @classmethod
     async def async_logic_delete(cls, update_sql: AioModelUpdate) -> None:
-        """逻辑删除或标记删除，可视情况调整"""
-        return await cls.async_update(update_sql)
+        """逻辑(软)删除记录"""
+        update_rows:int = await cls.async_update(update_sql)
+        # TODO 这里更换成自定义异常
+        assert update_rows >= 1,  "删除失败"
 
 
     @classmethod

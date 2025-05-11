@@ -24,3 +24,6 @@ class ChatSessionModel(BaseModel):
 
     class Meta:
         table_name="chat_session"
+
+    def __repr__(self) -> str:
+        return super().__repr__()

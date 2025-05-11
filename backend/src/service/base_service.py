@@ -1,10 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Never
 
-from src.util.common_util import Singleton
 
-
-class BaseService(ABC, Singleton):
+class BaseService(ABC):
     @classmethod
     @abstractmethod
     async def start(cls) -> Never:

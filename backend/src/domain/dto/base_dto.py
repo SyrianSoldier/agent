@@ -1,11 +1,10 @@
-import pydantic
-from pydantic import Field
-from typing import Annotated
+from dataclasses import dataclass
 
-class BaseDto(pydantic.BaseModel):
-    """接受前端传递的数据,用pydantic做参数校验"""
+@dataclass
+class BaseDto():
+    pass
 
-
+@dataclass
 class PaginationDto(BaseDto):
-    pagesize:  Annotated[int, Field(default=10)]
-    pagenum: Annotated[int, Field(default=1)]
+    pagesize:int = 10
+    pagenum:int = 1

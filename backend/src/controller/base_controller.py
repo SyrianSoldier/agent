@@ -1,10 +1,9 @@
 import json
-from typing import Any,Literal
+from typing import Any,Literal, override
 import tornado.web
 from src.util.api_response import ApiResponse
 from src.constants.status_code import HTTPStatusCode, BizStatusCode
 from src.domain.vo.base_vo import BaseVo
-from src.domain.dto.base_dto import BaseDto
 from src.util.bean_util import BeanUtil
 
 type Pagination = dict[
@@ -19,7 +18,21 @@ type Pagenum = int
 class BaseController(tornado.web.RequestHandler):
     """http请求基本handler
     """
-    async def return_success(
+    @override
+    def prepare(self) -> None:
+        self.set_header('Content-Type', 'application/json')
+
+
+    @override
+    def write_error(self, status_code:int, **kwargs:Any) -> None:
+        exception_info:tuple[type[Exception], Exception] | None = kwargs.get("exc_info", None)
+        # TODO: 出错误的时候向前端返回错误信息即可, 已经实现了, 但是要向日志中写入堆栈报错日志
+        if exception_info and isinstance(exception_info[1], Exception):
+            exception_msg:str = exception_info[1].args[0]
+            self.return_failed(message=exception_msg)
+
+
+    def return_success(
         self,
         data: BaseVo | None = None,
         http_code: HTTPStatusCode=HTTPStatusCode.OK,
@@ -40,11 +53,11 @@ class BaseController(tornado.web.RequestHandler):
 
         self.write(dict(response))
 
-        await self.finish()
+        self.finish()
 
 
 
-    async def return_failed(
+    def return_failed(
         self,
         biz_code: BizStatusCode = BizStatusCode.FAILED,
         message: str = BizStatusCode.FAILED.description,
@@ -59,7 +72,7 @@ class BaseController(tornado.web.RequestHandler):
 
         self.write(dict(response))
 
-        await self.finish()
+        self.finish()
 
 
 

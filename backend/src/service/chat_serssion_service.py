@@ -1,4 +1,6 @@
 from typing_extensions import override
+
+from src.util.time_util import TimeUtil
 from .base_service import BaseService
 from src.service.log_service import LogService
 from src.domain.model.chat_session_model import ChatSessionModel
@@ -23,21 +25,25 @@ class ChatSeesionService(BaseService):
         pass
 
 
-
-
-
     @classmethod
     async def create_chat_session(cls, dto: ChatSessionCreateDto) -> ChatSessionVo:
         model = BeanUtil.to_bean(dto, ChatSessionModel)
         model.create_user = 0 # TODO: 添加user
+
         await DBService.async_insert(model)
-        return BeanUtil.to_bean(model, ChatSessionVo)
+
+        vo = BeanUtil.to_bean(model, ChatSessionVo)
+        vo.create_at = TimeUtil.utc_to_shanghai(model.gmt_create)
+        vo.modified_at= TimeUtil.utc_to_shanghai(model.gmt_modified)
+        return vo
 
 
 
     @classmethod
     async def delete_chat_session(cls, dto: ChatSessionDeleteDto) -> None:
-        sql = ChatSessionModel.update(is_deleted=1).where(
+        sql = ChatSessionModel.update(
+            is_deleted=1
+        ).where(
             (ChatSessionModel.uuid == dto.uuid) &
             (ChatSessionModel.is_deleted == 0)
         )
@@ -60,26 +66,28 @@ class ChatSeesionService(BaseService):
 
     @classmethod
     async def get_chat_session_list(cls, dto: PaginationDto) -> PaginationVo:
-        sql = ChatSessionModel.select().where(
+        base_sql = ChatSessionModel.select().where(
             ChatSessionModel.is_deleted == 0
-        ).offset(
+        )
+
+        list_sql = base_sql.offset(
             (dto.pagenum - 1) * dto.pagesize
         ).limit(
             dto.pagesize
         ).order_by(
-            ChatSessionModel.gmt_modified.desc()
+            ChatSessionModel.id.desc()
         )
 
-        chat_session_list:list[ChatSessionModel] = await DBService.async_query_list(sql)
+        chat_session_list:list[ChatSessionModel] = await DBService.async_query_list(list_sql)
 
         chat_session_vo_list:list[ChatSessionVo] = [
             BeanUtil.to_bean(item, ChatSessionVo)
             for item in chat_session_list
         ]
 
-        totol:int = len(chat_session_vo_list)
+        totol:int = base_sql.count()
 
-        vo = PaginationVo(total=totol, list=chat_session_list)
+        vo = PaginationVo(total=totol, list=chat_session_vo_list)
         return vo
 
 
@@ -91,6 +99,7 @@ class ChatSeesionService(BaseService):
         )
 
         model = await DBService.async_query_detail(sql)
-        # TODO: 处理model为none的情况
         vo = BeanUtil.to_bean(model, ChatSessionVo)
+        vo.create_at = TimeUtil.utc_to_shanghai(model.gmt_create)
+        vo.modified_at= TimeUtil.utc_to_shanghai(model.gmt_modified)
         return vo

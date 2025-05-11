@@ -3,10 +3,8 @@ from dataclasses import dataclass
 
 @dataclass
 class ChatSessionVo(BaseVo):
-    gmt_create:str
-    gmt_modified:str
-    title:str
-    uuid:str
-
-
+    create_at:str|None = None
+    modified_at:str|None = None
+    title:str|None = None
+    uuid:str|None = None
 

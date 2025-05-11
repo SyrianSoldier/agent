@@ -29,12 +29,12 @@ class FlowService(BaseService):
 
 class LangGraphBuilder:
     """通过json构建Langgraph"""
-    def __init__(self):
+    def __init__(self) -> None:
         self.langgraph:StateGraph = StateGraph(State)
 
 
     def node_reducer_factory(self, node_type:NodeType, node_id:str, node_inputs:list[NodeInputItem]) -> State:
-        def reducer(state:State):
+        def reducer(state:State): # type: ignore
             """图状态的reducer函数,请保持此函数是纯函数"""
             node_ins:BaseNode = NodeFactory.get_node_by_type(node_type)
             node_output:NodeOutput = node_ins.execute(state, node_inputs, node_id)

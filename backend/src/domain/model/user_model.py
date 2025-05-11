@@ -20,3 +20,6 @@ class UserModel(BaseModel):
 
     class Meta:
         table_name="user"
+
+    def __repr__(self) -> str:
+        return super().__repr__()

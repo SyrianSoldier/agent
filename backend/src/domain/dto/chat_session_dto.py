@@ -1,23 +1,23 @@
 from .base_dto import BaseDto, PaginationDto
-from pydantic import Field
-from typing import Annotated
+from dataclasses import dataclass
 
+@dataclass
 class ChatSessionCreateDto(BaseDto):
-    title: Annotated[str, Field(min_length=1, max_length=100)]
+    title: str|None = None
 
-
+@dataclass
 class ChatSessionDeleteDto(BaseDto):
-    uuid: str
+    uuid: str|None = None
 
-
+@dataclass
 class ChatSessionRenameDto(BaseDto):
-    uuid: str
-    title: Annotated[str, Field(min_length=1, max_length=100)]
+    uuid: str|None = None
+    title: str|None = None
 
-
+@dataclass
 class ChatSessionDetailDto(BaseDto):
-    uuid: str
+    uuid: str|None = None
 
-
+@dataclass
 class ChatSessionListDto(PaginationDto):
     pass

@@ -12,28 +12,28 @@ class Create(BaseController):
     async def post(self) -> None:
         dto = self.request_body_to_dto(ChatSessionCreateDto)
         vo = await ChatSeesionService.create_chat_session(dto)
-        await self.return_success(data=vo)
+        self.return_success(data=vo)
 
 
 class Delete(BaseController):
     async def post(self) -> None:
         dto = self.request_body_to_dto(ChatSessionDeleteDto)
         await ChatSeesionService.delete_chat_session(dto)
-        await self.return_success()
+        self.return_success()
 
 
 class Rename(BaseController):
     async def post(self) -> None:
         dto = self.request_body_to_dto(ChatSessionRenameDto)
         await ChatSeesionService.rename_chat_session_title(dto)
-        await self.return_success()
+        self.return_success()
 
 
 class Detail(BaseController):
     async def get(self) -> None:
         dto = self.request_body_to_dto(ChatSessionDetailDto)
         vo = await ChatSeesionService.get_chat_session_detail(dto)
-        await self.return_success(data=vo)
+        self.return_success(data=vo)
 
 
 
@@ -41,4 +41,4 @@ class List(BaseController):
     async def get(self) -> None:
         dto = self.request_body_to_dto(ChatSessionListDto)
         vo = await ChatSeesionService.get_chat_session_list(dto)
-        await self.return_success(data=vo)
+        self.return_success(data=vo)
