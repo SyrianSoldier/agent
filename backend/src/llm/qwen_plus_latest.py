@@ -17,7 +17,8 @@ class RequestParams(BaseRequestParams):
     base_url:str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     model:str = "qwq-plus-latest"
 
-#TODO: 重构,看下如何更好的langchain结合,现在先能调用通就行
+#TODO: 重构, 看下如何更好的langchain结合,现在先能调用通就行
+#TODO: 重构, 继承runtime日志,看下怎么个添加法
 class QwenPlus(BaseLLM[RequestParams]):
     request_params:RequestParams|None = None
     model_name:str = "qwq-plus-latest"
@@ -76,7 +77,7 @@ if __name__ == "__main__":
     async def run_qwen_plus() -> None:
         llm = QwenPlus()
         llm.request_params = RequestParams(
-            api_key="sk-d349b80d80bf4e77a2de968c868947bc",
+            api_key="you api key",
         )
         async for token in llm.astream("你是个聪明的助手"):
             print(token, end="", flush=True)
