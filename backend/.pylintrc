@@ -21,6 +21,8 @@ disable =
     wrong-import-order,        # import 排序
     logging-fstring-interpolation, # 用%的模版字符串
     wrong-import-order        # import 排序
+    line-too-long             # 过长的行
+    too-few-public-methods    # 太少的公开方法
 
 # 启用高优先级检查
 enable =

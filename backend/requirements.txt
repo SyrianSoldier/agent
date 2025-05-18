@@ -35,3 +35,6 @@ tzdata==2025.1
 colorlog==6.9.0
 # aio-files的类型文件
 types-aiofiles==24.1.0.20250326
+
+# 模型平台sdk
+dashscope==1.23.3
