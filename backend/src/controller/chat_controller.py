@@ -1,9 +1,23 @@
+import json
 from typing import Any
+from dataclasses import dataclass, field
 import tornado.websocket
 import tornado.httputil
 from typing_extensions import override
+from src.service.log_service import LogService
+from src.domain.model.message_history_model import MessageHistoryModel
+from src.service.message_history_service import MessageHistoryService
+from src.util.bean_util import BeanUtil
+from src.util.json_util import JsonUtil
 from src.service.chat_service import ChatService
-from src.util.env_util import EnvUtil
+
+@dataclass
+class ChatRequestDto():
+    model_name:str|None = None
+    # TODO: messages和request_params协商具体的类型,并且BeanUtil.to_bean能正确的转换
+    messages: list[dict[str, Any]] = field(default_factory=list) # [ {role:User, content: "xxx"} ]
+    request_params:dict[str, Any] = field(default_factory=dict)  # 对应的模型的请求参数
+
 
 class ChatController(tornado.websocket.WebSocketHandler):
     def __init__(
@@ -14,30 +28,46 @@ class ChatController(tornado.websocket.WebSocketHandler):
     ) -> None:
         super().__init__(application, request, **kwargs)
 
-    @override
-    def open(self, *args: Any, **kwargs: Any) -> None:
-        print("WebSocket 连接已建立")
-
-    @override
-    def on_close(self) -> None:
-        print("WebSocket 连接已关闭")
-
-    @override
-    def data_received(self, chunk: Any) -> None:
-        pass
-
-    @override
-    def on_message(self, message: str | bytes) -> None:
-        if isinstance(message, str):
-            bot_message:str = ChatService().on_chat(message)
-            ChatService().save_chat_history(user_message=message, bot_message=bot_message)
-
-            return
-            # TODO
-        else:
-            pass
-        print(message)
+        self.session_uuid:str|None = None
 
     @override
     def check_origin(self, origin: str) -> bool:
-        return origin in EnvUtil.get_cur_env_config().get("allowed_origins") #type: ignore
+        return True
+
+
+    @override
+    async def open(self, *args: Any, **kwargs: Any) -> None:
+        session_uuid:str|None = self.get_query_argument("session_uuid",default=None)
+
+        assert session_uuid is not None, "session_uuid不能为空"
+
+        history_msgs: list[MessageHistoryModel] = await MessageHistoryService.get_chat_history_list(session_uuid)
+        history_msg_json = [BeanUtil.to_bean(history_message, dict, convert=True) for history_message in history_msgs]
+        self.write_message(JsonUtil.dumps(history_msg_json))
+        LogService.runtime_logger.info("WebSocket 连接已建立")
+
+
+    @override
+    def on_close(self) -> None:
+        LogService.runtime_logger.info("WebSocket 连接已关闭")
+
+
+    @override
+    async def on_message(self, message: str) -> None: # type:ignore
+        # 获取参数
+        session_uuid:str|None = self.get_query_argument("session_uuid",default=None)
+        request_dict:dict[str, Any] = JsonUtil.loads(message)
+        chat_request_dto = BeanUtil.to_bean(request_dict, ChatRequestDto)
+
+        assert session_uuid is not None, "session_uuid不能为空"
+        assert chat_request_dto.model_name is not None, "模型名称不能为None"
+        assert chat_request_dto.request_params is not None, "模型请求参数不能为None"
+        assert chat_request_dto.messages is not None, "模型消息参数不能为None"
+
+        await ChatService.on_chat_stream(
+            prompt=JsonUtil.dumps(chat_request_dto.messages),
+            model_name=chat_request_dto.model_name,
+            request_params=chat_request_dto.request_params,
+            session_uuid=session_uuid,
+            write_message= lambda message: self.write_message(message)
+        )

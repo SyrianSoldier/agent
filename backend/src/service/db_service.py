@@ -33,13 +33,13 @@ class DBService(BaseService):
 
 
     @classmethod
-    async def async_query_detail(cls, query: AioModelSelect) -> BaseModel:
+    async def async_query_detail(cls, query: AioModelSelect) -> BaseModel|None:
         """查询详情（返回单条记录）"""
         try:
             model:BaseModel = await query.aio_get()
             return model
-        except peewee.DoesNotExist as e:
-            assert False, f"查询失败"
+        except peewee.DoesNotExist:
+            return None
 
 
     @classmethod

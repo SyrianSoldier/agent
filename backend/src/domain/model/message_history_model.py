@@ -8,9 +8,9 @@ class ChatRole(Enum):
 
 
 class MessageHistoryModel(BaseModel):
-    parent_id:int = peewee.BigIntegerField(
-        null=False,
-        unique=True, # 形成的历史消息列表为单链表, 不存在两个节点的父节点相同的情况
+    parent_id:str = peewee.BigIntegerField(
+        null=False, # parent_id为预留字段,暂时不用
+        default=-1,
         verbose_name="上一条历史消息的id"
     )
 
@@ -30,8 +30,9 @@ class MessageHistoryModel(BaseModel):
         verbose_name="聊天角色"
     )
 
-    session_id:int = peewee.BigIntegerField(
+    session_uuid:str = peewee.CharField(
         null=False,
+        max_length=256,
         verbose_name="关联的会话id"
     )
 

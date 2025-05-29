@@ -8,7 +8,7 @@ from typing import Any
 import unittest
 import datetime
 from dataclasses import dataclass, field
-
+from enum import Enum
 
 class TestBeanUtil(unittest.TestCase):
     """python -m pytest tests/utils/test_bean_util.py::TestBeanUtil
@@ -257,4 +257,30 @@ class TestBeanUtil(unittest.TestCase):
         assert obj["username"] == "zs"
         assert obj["age"] == 18
         assert obj["friend_address"] == "hunan"
+
+    def test_set_attr(self) -> None:
+        class Status(Enum):
+              ACTIVE = "active"
+              DEACTIE = "deactive"
+
+        @dataclass
+        class Test():
+            a:Status|None = None
+            b:str|None = None
+
+        obj = Test()
+
+        BeanUtil.set_attr(obj, "a", "active", convert=True) # 自动转成了Status.Avtive
+        assert obj.a is Status.ACTIVE
+
+        BeanUtil.set_attr(obj, "a", None, convert=True)
+        assert obj.a is None
+
+        # 无法映射的属性值,会被忽略直接赋值
+        BeanUtil.set_attr(obj, "a", "无法映射的属性值", convert=True)
+        assert obj.a == "无法映射的属性值"
+
+        BeanUtil.set_attr(obj, "b", "一段字符串", convert=True)
+        assert obj.b == "一段字符串"
+
 

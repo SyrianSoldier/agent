@@ -2,6 +2,8 @@ from typing import TypeIs, Any
 import inspect
 import peewee
 import dataclasses
+import types
+import typing
 
 class ValidateUtil:
     @classmethod
@@ -64,3 +66,10 @@ class ValidateUtil:
             cls.is_protected_key(key) or
             cls.is_magic_key(key)
         )
+
+    @classmethod
+    def is_union_type(cls,tp) -> TypeIs[types.UnionType]: # type: ignore
+        if typing.get_origin(tp) is typing.Union:
+            raise TypeError("不支持Union语法, 请用最新的语法,如'a:str|None'")
+
+        return typing.get_origin(tp) is types.UnionType

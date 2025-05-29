@@ -1,9 +1,11 @@
 import copy
 import dataclasses
-
+import enum
+import types
+import typing
 from typing import Any
 from .validate_util import ValidateUtil
-
+from .json_util import JsonUtil
 
 class BeanUtil:
     @classmethod
@@ -15,7 +17,13 @@ class BeanUtil:
         default: Any = None,
         deep_clone: bool = False
     ) -> Any:
-        """统一获取对象/实例值的方式，并可选择返回深拷贝副本，避免外部修改原值"""
+        """统一获取对象/实例值的方式，并可选择返回深拷贝副本，避免外部修改原值
+           key支持连续获取的形式,
+
+           如
+           dict1 = {"a":{"b": {"c": 1} } }
+           get_value(dict1, "a.b.c") # 1
+        """
 
         def get_item_value(
             obj: dict[str, Any] | object,
@@ -54,6 +62,68 @@ class BeanUtil:
 
 
         return copy.deepcopy(value) if deep_clone else value
+
+    @classmethod
+    def set_attr(cls, obj: object, key:str, value:Any, convert: bool = False) -> None:
+        """给实例设置key,value. 并且当convert为true时, 自动根据obj的类型注解转换类型
+           现在支持:Enum, 其他待支持
+
+           如:
+            class Status(Enum):
+                ACTIVE = "active"
+                DEACTIE = "deactive"
+
+            class Test():
+                a:Status|None = None
+
+            obj = Test()
+
+            BeanUtil.set_attr(obj, "a", "active") # 自动转成了Status.Avtive
+
+            print(type(obj.a)) # 输出 <class Status>
+
+        """
+        if convert is False:
+            return setattr(obj, key, value)
+
+        def process_not_union_type(type_hint:type[object]) -> None:
+            """处理非联合类型
+            """
+            if issubclass(type_hint, enum.Enum):
+                setattr(
+                    obj,
+                    key,
+                    # 从枚举中获取枚举member, 如果没有对应的回退到原始值
+                    cls.get_value(type_hint._value2member_map_, value, default=value)
+                )
+            else:
+                # 其他类型尚未支持, 原封不动覆盖
+                setattr(obj, key, value)
+
+
+
+        typing_hint_dict:dict[str, Any] = typing.get_type_hints(obj)
+        type_hint = typing_hint_dict.get(key, None)
+        assert type_hint is not None, f"当前属性:{key}未找到对应的类型注解"
+
+        # 如果是联合类型, 且只由两个组成
+        if ValidateUtil.is_union_type(type_hint):
+            type_tuple = typing.get_args(type_hint) # 取出联合类型的每个类型,如 a:str|None --> (str, None)
+
+            # 如果联合类型只有两个组成,且其中一个是None, 如 a:str|None,
+            if len(type_tuple) == 2 and any(tp is types.NoneType for tp in type_tuple):
+                if value is None:
+                    setattr(obj, key, None)
+                else:
+                    type_hint = list(filter(lambda x: x is not None, type_tuple))[0] # 去除联合类型,如str|None --> str
+                    process_not_union_type(type_hint)
+            else:
+                raise TypeError("不支持处理复杂的联合类型,现在仅支持处理: type|None 形式的联合类型")
+
+        else:
+            process_not_union_type(type_hint)
+
+
 
 
     @classmethod
@@ -144,6 +214,7 @@ class BeanUtil:
         from_: T,
         to: type[U],
         deep_clone: bool = False,
+        convert: bool = False,
         *init_to_args: Any,
         **init_to_kwargs: Any
     ) -> U:
@@ -160,6 +231,7 @@ class BeanUtil:
             from_ (T): 源对象，可以是字典或对象实例。
             to (type[U]): 目标类型, 目前支持 `普通python class`、`dict`、`字典字面量`。
             deep_clone(bool): 是否以深克隆的方式将from中的属性复制到to, 默认值为false
+            convert(bool): 是否在to_bean过程中根据to的类型注解自动转换类型. 详细见 `set_attr`方法
 
         Returns:
             U: `to` 类型的实例或字典，包含来自 `from_` 的值。
@@ -206,6 +278,9 @@ class BeanUtil:
             }
 
         if ValidateUtil.is_dict_class(to):
+            if convert is True and ValidateUtil.is_peewee_model(from_):
+                return JsonUtil.loads(JsonUtil.dumps(from_))
+
             return {
                 key: cls.get_value(from_, key, deep_clone=deep_clone)
                 for key in from_keys
@@ -213,7 +288,13 @@ class BeanUtil:
 
         elif ValidateUtil.is_user_defined_class(to) and (to_ins is not None):
             for key in keys_intersection:
-                setattr(to_ins, key, cls.get_value(from_, key, deep_clone=deep_clone))
+                # setattr(  to_ins, key, cls.get_value(from_, key, deep_clone=deep_clone))
+                cls.set_attr(
+                    to_ins,
+                    key,
+                    cls.get_value(from_, key, deep_clone=deep_clone),
+                    convert=convert
+                )
             return to_ins
 
         raise TypeError("Parameter 'to' must be an instance of a user-defined class or a dict class or a dictionary.")

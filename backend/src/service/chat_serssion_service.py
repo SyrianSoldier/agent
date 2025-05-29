@@ -98,8 +98,9 @@ class ChatSeesionService(BaseService):
             (ChatSessionModel.uuid == dto.uuid)
         )
 
-        model = await DBService.async_query_detail(sql)
-        vo = BeanUtil.to_bean(model, ChatSessionVo)
-        vo.create_at = TimeUtil.utc_to_shanghai(model.gmt_create)
-        vo.modified_at= TimeUtil.utc_to_shanghai(model.gmt_modified)
+        session = await DBService.async_query_detail(sql)
+        assert session is not None, "会话查询失败"
+        vo = BeanUtil.to_bean(session, ChatSessionVo)
+        vo.create_at = TimeUtil.utc_to_shanghai(session.gmt_create)
+        vo.modified_at= TimeUtil.utc_to_shanghai(session.gmt_modified)
         return vo
