@@ -310,8 +310,8 @@ const handleNewChat = () => {
 };
 const handleSelectChat = (chatId) => {
   activeChat.value = chatId;
-  showWelcomeScreen.value = false; // 切换到具体聊天时隐藏欢迎页面
-  scrollToBottom(); // 滚动到底部
+  showWelcomeScreen.value = false;
+  scrollToBottom(); 
 };
 //  deleteChat 删除聊天
 const deleteChat = (chatId) => {
