@@ -1,41 +1,4 @@
 <template>
-<<<<<<< HEAD
-  <el-container class="main-container">
-    <!-- 侧边栏 -->
-    <el-aside 
-      class="sidebar"
-      :style="{width: isCollapsed ? '68px' : '260px'}"
-    >
-
-      <!-- 侧边栏第一行 -->
-      <div class="sidebar-header">
-        <div class="text-wrapper">
-          <el-icon v-if="!isCollapsed" color="white"><Sugar /></el-icon>
-        
-          <h3 v-if="!isCollapsed">
-            <span>SmartAgent</span>
-          </h3>
-        </div>
-        
-        <ExpandBtn :collapse="isCollapsed" @toggle="isCollapsed = !isCollapsed"/>
-      </div>
-
-      <!-- 侧边栏第二行 -->
-      <NewChatBtn/>
-
-      <!-- 侧边栏最后一行:  -->
-      <el-scrollbar class="history-scroll">
-        <div class="history-list">
-          <div 
-            v-for="item in historyList"
-            :key="item.id"
-            class="history-item"
-            :class="{active: item.id === activeHistory}"
-          > 
-            <div>{{ item.title }}</div>
-            <div><el-icon><MoreFilled /></el-icon></div>
-          </div>
-=======
   <div class="chat-page">
     <!-- sidebar 侧边栏 -->
     <aside class="sidebar" :class="{ collapsed: isSidebarCollapsed }">
@@ -128,7 +91,6 @@
               </el-menu-item>
             </el-menu>
           </el-scrollbar>
->>>>>>> 84acb7f204ea0ce50ea88ea30bb348f7989d6f40
         </div>
       </div>
 
@@ -148,22 +110,6 @@
     <!-- main-content 主内容区 -->
     <main class="main-content" :class="{ collapsed: isSidebarCollapsed }">
       <div class="chat-container">
-<<<<<<< HEAD
-        <el-header class="header">
-          <el-input class="seessionTitle" v-model="sessionTitle"/>
-        </el-header>
-
-        <el-main class="chat-main">
-          <div 
-            v-for="(message, index) in messages"
-            :key="index"
-            class="message-wrapper"
-            :class="{ 'user-message': message.role === 'user' }"
-          >
-            <div class="message-bubble">
-              <div class="message-content">{{ message.content }}</div>
-              <div class="message-time">{{ message.time }}</div>
-=======
         <!-- chat-header 聊天头部 -->
         <div class="chat-header">
           <el-input
@@ -229,7 +175,6 @@
                   </div>
                 </div> 
               </div>
->>>>>>> 84acb7f204ea0ce50ea88ea30bb348f7989d6f40
             </div>
 
             <div
@@ -381,18 +326,6 @@ const deleteChat = (chatId) => {
   }
 };
 
-<<<<<<< HEAD
-<script setup lang="ts">
-import { ref } from 'vue'
-import ExpandBtn from "./components/ExpandBtn/index.vue"
-import NewChatBtn from "./components/NewChatBtn/index.vue"
-
-interface Message {
-  role: 'USER' | 'ASSISTANT'
-  content: string
-}
-=======
->>>>>>> 84acb7f204ea0ce50ea88ea30bb348f7989d6f40
 
 const setTitleInputRef = (chatId, el) => {
   if (el) {
@@ -468,31 +401,9 @@ const handleSendMessage = () => {
     time: new Date(),
   };
 
-<<<<<<< HEAD
-// 会话标题
-const sessionTitle = ref<string>("示例标题")
-
-// 消息数据
-const messages = ref<Message[]>([
-  {
-    role: 'assistant',
-    content: '你好！我是ChatGPT，有什么可以帮助你的吗？',
-    time: '10:00 AM'
-  },
-  {
-    role: 'user',
-    content: '请帮我写一个Vue3的示例代码',
-    time: '10:01 AM'
-  },
-  {
-    role: 'assistant',
-    content: '好的，您需要什么类型的示例？组件示例还是组合式API示例？',
-    time: '10:02 AM'
-=======
   const chat = chats.value.find((c) => c.id === activeChat.value);
   if (chat) {
     chat.messages.push(userMessage);
->>>>>>> 84acb7f204ea0ce50ea88ea30bb348f7989d6f40
   }
 
   newMessage.value = "";
@@ -552,13 +463,8 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-<<<<<<< HEAD
-.main-container {
-  overflow: hidden;
-=======
 .chat-page {
   display: flex;
->>>>>>> 84acb7f204ea0ce50ea88ea30bb348f7989d6f40
   height: 100vh;
   width: 100%;
   background-color: #fff;
@@ -586,17 +492,6 @@ onMounted(() => {
 }
 
 .sidebar-header {
-<<<<<<< HEAD
-  max-height: 80px;
-  padding: 12px 10px 24px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  
-  
-  h3 {
-    color: white;
-=======
   padding: 16px;
   display: flex;
   align-items: center;
@@ -604,7 +499,6 @@ onMounted(() => {
   border-bottom: 1px solid #eee;
 
   h2 {
->>>>>>> 84acb7f204ea0ce50ea88ea30bb348f7989d6f40
     margin: 0;
     font-size: 18px;
     font-weight: 600;
@@ -612,27 +506,6 @@ onMounted(() => {
   }
 }
 
-<<<<<<< HEAD
-.text-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.collapse-btn {
-  width: 36px;
-  height: 36px;
-  background: transparent;
-  border-color: #444654;
-  color: white;
-   &:hover {
-    background: #343541;
-  }
-}
-
-
-.history-scroll {
-=======
 .collapse-btn {
   border: none;
   background: transparent;
@@ -647,7 +520,6 @@ onMounted(() => {
 }
 
 .sidebar-content {
->>>>>>> 84acb7f204ea0ce50ea88ea30bb348f7989d6f40
   flex: 1;
   padding: 10px;
   display: flex;
@@ -669,30 +541,6 @@ onMounted(() => {
   }
 }
 
-<<<<<<< HEAD
-.history-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 38px;
-  padding: 0 10px;
-  color: #ececf1;
-  border-radius: .375rem;
-  cursor: pointer;
-  font-size: 14px;
-  
-  &:hover {
-    background: #333333;
-  }
-  
-  &.active {
-    background: #494949;
-  }
-}
-
-.content-container {
-  background: #292a2d;
-=======
 .chat-history {
   flex: 1;
   display: flex;
@@ -758,7 +606,6 @@ onMounted(() => {
       background-color: #f5f5f5;
     }
   }
->>>>>>> 84acb7f204ea0ce50ea88ea30bb348f7989d6f40
 }
 
 .main-content {
@@ -779,12 +626,8 @@ onMounted(() => {
   }
 }
 
-<<<<<<< HEAD
-.header {
-=======
 .chat-header {
   padding: 16px 24px;
->>>>>>> 84acb7f204ea0ce50ea88ea30bb348f7989d6f40
   display: flex;
   align-items: center;
   justify-content: center;
@@ -916,36 +759,6 @@ onMounted(() => {
     }
   }
 
-<<<<<<< HEAD
-.send-btn {
-  height: 2.25rem;
-  align-self: flex-end;
-  margin-bottom: .5rem;
-}
-
-
-.seessionTitle {
-  width: 335px;
-  height: 40px;
-  margin: 0 auto;
-
-  :deep(.el-input__inner) {
-    font-weight: 700;
-    font-size: 20px;
-    text-align: center;
-  }
-
-  :deep(.el-input__wrapper) {
-    --el-input-text-color:white ;
-    --el-input-hover-border:#525252;
-    --el-input-border-color: transparent;
-    background-color: transparent;
-    text-align: center;
-  
-  }
-}
-</style>
-=======
   .input-footer {
     display: flex;
     justify-content: space-between;
@@ -969,7 +782,6 @@ onMounted(() => {
         }
       }
     }
->>>>>>> 84acb7f204ea0ce50ea88ea30bb348f7989d6f40
 
     .input-actions-right {
       display: flex;
