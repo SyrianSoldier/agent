@@ -3,7 +3,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/chat",
-    name: "home",
+    name: "chat",
     component: () =>  import(/* webpackChunkName: "chat" */ "@/components/Chat/index.vue")
   }
 ];

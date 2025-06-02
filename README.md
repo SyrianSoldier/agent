@@ -92,8 +92,3 @@
 |                         |          |      |      |        | 第三方库的`logger`要集成到logger里<br /><br />`2025-04-06 16:10:20 [DEBUG] asyncio:proactor_events.py:633 - Using proactor: IocpProactor`<br /><br />`2025-04-06 16:10:20 [ERROR] tornado.application:ioloop.py:770 - Exception in callback functools.partial(<function app_started_welcome at 0x00000200FA268AE0>)`<br /><br />这两条应该集成到自己的日志里 |         |
 |                         |          |      |      |        |                                          |         |
 | **sentry集成前后端日志**       | 后端架构优化二期 | p3   | ⭐⭐⭐⭐ |        |                                          |         |
-
-
-
-
-

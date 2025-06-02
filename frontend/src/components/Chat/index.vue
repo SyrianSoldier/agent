@@ -3,34 +3,26 @@
     <!-- 侧边栏 -->
     <el-aside 
       class="sidebar"
-      :style="{width: isCollapsed ? '4rem' : '260px'}"
+      :style="{width: isCollapsed ? '68px' : '260px'}"
     >
+
+      <!-- 侧边栏第一行 -->
       <div class="sidebar-header">
-        <img 
-          v-if="!isCollapsed"
-          :src=logoPng 
-          class="logo"
-          alt="Logo"
-        >
-        <h3 v-if="!isCollapsed">Agent平台</h3>
-        <el-button
-          circle
-          class="collapse-btn"
-          @click="isCollapsed = !isCollapsed"
-        >
-          <i :class="isCollapsed ? 'el-icon-s-unfold' : 'el-icon-s-fold'"></i>
-        </el-button>
+        <div class="text-wrapper">
+          <el-icon v-if="!isCollapsed" color="white"><Sugar /></el-icon>
+        
+          <h3 v-if="!isCollapsed">
+            <span>SmartAgent</span>
+          </h3>
+        </div>
+        
+        <ExpandBtn :collapse="isCollapsed" @toggle="isCollapsed = !isCollapsed"/>
       </div>
 
-      <el-button
-        type="primary"
-        class="new-chat-btn"
-        @click="handleNewChat"
-      >
-        <i class="el-icon-plus"></i>
-        <span v-if="!isCollapsed">新对话</span>
-      </el-button>
+      <!-- 侧边栏第二行 -->
+      <NewChatBtn/>
 
+      <!-- 侧边栏最后一行:  -->
       <el-scrollbar class="history-scroll">
         <div class="history-list">
           <div 
@@ -38,9 +30,9 @@
             :key="item.id"
             class="history-item"
             :class="{active: item.id === activeHistory}"
-          >
-            <i class="el-icon-chat-line-round"></i>
-            <span v-if="!isCollapsed">{{ item.title }}</span>
+          > 
+            <div>{{ item.title }}</div>
+            <div><el-icon><MoreFilled /></el-icon></div>
           </div>
         </div>
       </el-scrollbar>
@@ -50,7 +42,7 @@
     <el-container class="content-container">
       <div class="chat-container">
         <el-header class="header">
-          <h2>当前对话</h2>
+          <el-input class="seessionTitle" v-model="sessionTitle"/>
         </el-header>
 
         <el-main class="chat-main">
@@ -94,12 +86,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import logoPng from "@/assets/logo.png" 
+import ExpandBtn from "./components/ExpandBtn/index.vue"
+import NewChatBtn from "./components/NewChatBtn/index.vue"
 
 interface Message {
-  role: 'user' | 'assistant'
+  role: 'USER' | 'ASSISTANT'
   content: string
-  time: string
 }
 
 interface HistoryItem {
@@ -110,6 +102,9 @@ interface HistoryItem {
 
 // 侧边栏状态
 const isCollapsed = ref<boolean>(false)
+
+// 会话标题
+const sessionTitle = ref<string>("示例标题")
 
 // 消息数据
 const messages = ref<Message[]>([
@@ -146,6 +141,7 @@ const handleNewChat = () => {
 
 <style scoped lang="scss">
 .main-container {
+  overflow: hidden;
   height: 100vh;
 }
 
@@ -157,16 +153,12 @@ const handleNewChat = () => {
 }
 
 .sidebar-header {
-  padding: 1rem;
-  border-bottom: .0625rem solid #343541;
+  max-height: 80px;
+  padding: 12px 10px 24px 20px;
   display: flex;
   align-items: center;
-  gap: .75rem;
+  justify-content: space-between;
   
-  .logo {
-    width: 2rem;
-    height: 2rem;
-  }
   
   h3 {
     color: white;
@@ -174,24 +166,23 @@ const handleNewChat = () => {
   }
 }
 
+.text-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .collapse-btn {
-  margin-left: auto;
+  width: 36px;
+  height: 36px;
   background: transparent;
   border-color: #444654;
   color: white;
-}
-
-.new-chat-btn {
-  margin: 1rem;
-  background: #343541;
-  border-color: #444654;
-  color: white;
-  width: calc(100% - 2rem);
-  
-  &:hover {
-    background: #40414f;
+   &:hover {
+    background: #343541;
   }
 }
+
 
 .history-scroll {
   flex: 1;
@@ -202,27 +193,27 @@ const handleNewChat = () => {
 }
 
 .history-item {
-  padding: .75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 38px;
+  padding: 0 10px;
   color: #ececf1;
   border-radius: .375rem;
-  margin-bottom: .25rem;
-  display: flex;
-  align-items: center;
-  gap: .75rem;
   cursor: pointer;
-  font-size: .875rem;
+  font-size: 14px;
   
   &:hover {
-    background: #343541;
+    background: #333333;
   }
   
   &.active {
-    background: #343541;
+    background: #494949;
   }
 }
 
 .content-container {
-  background: #f5f5f5;
+  background: #292a2d;
 }
 
 .chat-container {
@@ -233,8 +224,6 @@ const handleNewChat = () => {
 }
 
 .header {
-  background: #fff;
-  border-bottom: .0625rem solid #e4e7ed;
   display: flex;
   align-items: center;
 }
@@ -314,6 +303,28 @@ const handleNewChat = () => {
   height: 2.25rem;
   align-self: flex-end;
   margin-bottom: .5rem;
+}
+
+
+.seessionTitle {
+  width: 335px;
+  height: 40px;
+  margin: 0 auto;
+
+  :deep(.el-input__inner) {
+    font-weight: 700;
+    font-size: 20px;
+    text-align: center;
+  }
+
+  :deep(.el-input__wrapper) {
+    --el-input-text-color:white ;
+    --el-input-hover-border:#525252;
+    --el-input-border-color: transparent;
+    background-color: transparent;
+    text-align: center;
+  
+  }
 }
 </style>
 
