@@ -14,6 +14,7 @@ class JsonUtil:
             if isinstance(obj, enum.Enum):
                 return obj.value
 
+
             raise TypeError(f"不支持序列化的类型:{obj}")
 
 

@@ -3,7 +3,7 @@ from peewee_async.aio_model import AioModelSelect, AioModelUpdate
 from typing import Any
 from src.domain.model.base_model import db, BaseModel
 from src.service.log_service import LogService
-from src.domain.model import chat_session_model, user_model, message_history_model
+from src.domain.model import chat_session_model, user_model, message_history_model, model_config
 from src.util.time_util import TimeUtil
 import peewee
 
@@ -12,6 +12,7 @@ class DBService(BaseService):
         chat_session_model.ChatSessionModel,
         user_model.UserModel,
         message_history_model.MessageHistoryModel,
+        model_config.ModeConfigModel
     ]
 
     @classmethod
@@ -86,4 +87,13 @@ class DBService(BaseService):
     async def async_execute_sql(cls, raw_sql: str) -> Any:
         """执行原始 SQL 语句"""
         return await db.aio_execute_sql(raw_sql)
+
+    @classmethod
+    async def async_count(cls, query: AioModelSelect) -> int:
+        """异步执行计数查询，返回记录数"""
+        # 使用 Peewee 的 count() 方法执行计数查询
+        count = await query.aio_count()
+        return count
+
+
 

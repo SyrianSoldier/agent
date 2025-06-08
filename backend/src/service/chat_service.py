@@ -5,8 +5,10 @@ from src.service.log_service import LogService
 from src.llm.base_llm import BaseLLM, BaseRequestParams
 from src.llm.qwen_plus_latest import QwenPlus, RequestParams as QwenPlusRequestParams
 from src.util.bean_util import BeanUtil
+from src.service.model_service import ModelService
 from src.service.message_history_service import MessageHistoryService
 from src.domain.model.message_history_model import MessageHistoryModel, ChatRole
+
 
 class ChatService(BaseService):
     @override
@@ -21,24 +23,6 @@ class ChatService(BaseService):
     async def end(cls) -> None:
         pass
 
-    # 所有的聊天模型要从这里注册,才能使用
-    all_model:list[dict[Literal["request_params","instance"], Any]] = [
-        {
-            "instance": QwenPlus(),
-            "request_params": QwenPlusRequestParams
-        }
-    ]
-
-    @classmethod
-    async def get_model_list(cls) -> list[dict[str, Any]]:
-        return [
-            {
-                "model_name": model_info["instance"].model_name,
-                "request_params": BeanUtil.to_bean(model_info["request_params"], dict),
-            }
-            for model_info in cls.all_model
-        ]
-
 
     @classmethod
     async def on_chat_stream(
@@ -50,12 +34,12 @@ class ChatService(BaseService):
         write_message:Callable[[Any], Any] # 一个函数,需要实现将模型生成的消息写到哪里去
     ) -> None:
         # 校验模型是否可用
-        model_info = list(filter(lambda model_info: model_info["instance"].model_name == model_name, cls.all_model))[0]
+        model_info = list(filter(lambda model_info: model_info["instance"].model_name == model_name, ModelService.all_model))[0]
         assert model_info is not None, f"不支持该模型:{model_name}"
 
         # 取出模型, 构建请求参数
         llm:BaseLLM[Any] = model_info["instance"] #type:ignore
-        RequestParams: BaseRequestParams = model_info["request_params"]
+        RequestParams: BaseRequestParams = model_info["request_params"].__class__
         llm.request_params = BeanUtil.to_bean(request_params, RequestParams)
 
         # 使用大模型发送请求

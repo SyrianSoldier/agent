@@ -1,10 +1,11 @@
 import json
 from typing import Any,Literal, override
 import tornado.web
+from src.util.json_util import JsonUtil
 from src.util.api_response import ApiResponse
 from src.constants.status_code import HTTPStatusCode, BizStatusCode
-from src.domain.vo.base_vo import BaseVo
 from src.util.bean_util import BeanUtil
+from src.util.validate_util import ValidateUtil
 
 type Pagination = dict[
     Literal["pagesize", "pagenum"],
@@ -34,7 +35,7 @@ class BaseController(tornado.web.RequestHandler):
 
     def return_success(
         self,
-        data: BaseVo | None = None,
+        data: Any | None = None,
         http_code: HTTPStatusCode=HTTPStatusCode.OK,
         biz_code: BizStatusCode = BizStatusCode.SUCCESS,
         message: str = BizStatusCode.SUCCESS.description
@@ -43,11 +44,13 @@ class BaseController(tornado.web.RequestHandler):
         """
         self.set_status(http_code)
 
-        json_data = (
-            data
-            if data is None
-            else BeanUtil.to_bean(data, dict)
-        )
+        json_data: Any|None = None
+
+        if ValidateUtil.is_dict(data):
+            json_data = BeanUtil.to_bean(data, dict)
+
+        # 将数据序列化/反序列化 转换数据类型
+        json_data = JsonUtil.loads(JsonUtil.dumps(data))
 
         response = ApiResponse.success(data=json_data, code=biz_code, message=message)
 
@@ -74,12 +77,27 @@ class BaseController(tornado.web.RequestHandler):
 
         self.finish()
 
+    @property
+    def json_request_body(self) -> dict[Any, Any]:
+        try:
+            obj = json.loads(self.request.body.decode("utf-8"))
+        except json.JSONDecodeError:
+            assert False, "当前请求体必须是json格式"
 
+        assert ValidateUtil.is_dict(obj), "当前请求体必须是json格式"
+
+        return obj
+
+    @property
+    def body_id(self) -> str:
+        body = self.json_request_body
+        id = body.get("id", None)
+        assert id is not None, "当前请求体中必须包含id属性"
+        return str(id)
 
     def request_body_to_dto[T](self, dto_class:type[T]) -> T:
-        json_data = json.loads(self.request.body.decode("utf-8"))  # 转字典
+        json_data = self.json_request_body
         return BeanUtil.to_bean(json_data, dto_class, convert=True)
-
 
 
     async def get_query_arguments_for_pagination(self) -> Pagination:

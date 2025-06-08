@@ -73,3 +73,11 @@ class ValidateUtil:
             raise TypeError("不支持Union语法, 请用最新的语法,如'a:str|None'")
 
         return typing.get_origin(tp) is types.UnionType
+
+    @classmethod
+    def is_obj(cls, obj: Any) -> TypeIs[object]:
+        return isinstance(obj, object)
+
+    @classmethod
+    def is_list(cls, obj:Any) -> TypeIs[list[Any]]:
+        return isinstance(obj, list)
