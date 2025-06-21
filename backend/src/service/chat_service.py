@@ -46,20 +46,25 @@ class ChatService(BaseService):
         bot_message:str = ""
         thinking_content:str|None = None # TODO:处理思考内容
 
+        write_message("[CHUNK START]") # 与前端约定, [CHUNK START]代表chunk开始
         async for token in llm.astream(prompt):
             if token.strip() != "":
                 write_message(token)
                 bot_message += token
 
-        # 创建历史消息
-        message_history = MessageHistoryModel(
+        # 创建用户历史消息
+        user_message_history = MessageHistoryModel(
+            content=prompt,
+            role=ChatRole.USER,
+            session_uuid=session_uuid
+        )
+        await MessageHistoryService.create_chat_history(user_message_history)
+
+        # 创建机器人历史消息
+        bot_message_history = MessageHistoryModel(
             content=bot_message,
             role=ChatRole.ASSISTANT,
             session_uuid=session_uuid,
             thinking_content=thinking_content
         )
-
-        await MessageHistoryService.create_chat_history(message_history)
-
-
-
+        await MessageHistoryService.create_chat_history(bot_message_history)

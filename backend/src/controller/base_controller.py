@@ -44,18 +44,17 @@ class BaseController(tornado.web.RequestHandler):
         """
         self.set_status(http_code)
 
-        json_data: Any|None = None
-
         if ValidateUtil.is_dict(data):
-            json_data = BeanUtil.to_bean(data, dict)
+            data = BeanUtil.to_bean(data, dict, convert=True)
 
-        # 将数据序列化/反序列化 转换数据类型
-        json_data = JsonUtil.loads(JsonUtil.dumps(data))
+        elif ValidateUtil.is_list(data):
+            data = [BeanUtil.to_bean(item, dict, convert=True) for item in data]
+        else:
+            data = BeanUtil.to_bean(data, dict, convert=True)
 
-        response = ApiResponse.success(data=json_data, code=biz_code, message=message)
+        response = ApiResponse.success(data=data, code=biz_code, message=message)
 
         self.write(dict(response))
-
         self.finish()
 
 

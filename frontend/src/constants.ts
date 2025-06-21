@@ -1,0 +1,1 @@
+export const ChatWebSocketBaseURL = "ws://localhost:1080"

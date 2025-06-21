@@ -14,8 +14,7 @@ from src.service.chat_service import ChatService
 @dataclass
 class ChatRequestDto():
     model_name:str|None = None
-    # TODO: messages和request_params协商具体的类型,并且BeanUtil.to_bean能正确的转换
-    messages: list[dict[str, Any]] = field(default_factory=list) # [ {role:User, content: "xxx"} ]
+    messages: str|None = None
     request_params:dict[str, Any] = field(default_factory=dict)  # 对应的模型的请求参数
 
 
@@ -65,7 +64,7 @@ class ChatController(tornado.websocket.WebSocketHandler):
         assert chat_request_dto.messages is not None, "模型消息参数不能为None"
 
         await ChatService.on_chat_stream(
-            prompt=JsonUtil.dumps(chat_request_dto.messages),
+            prompt=chat_request_dto.messages,
             model_name=chat_request_dto.model_name,
             request_params=chat_request_dto.request_params,
             session_uuid=session_uuid,

@@ -220,7 +220,7 @@ class BeanUtil:
     ) -> U:
         """
         功能:
-        1. **功能**: 将 `from_` 的键值对映射到 `to` 类型的实例。
+        1. **功能**: 将 `from` 的键值对映射到 `to` 类型的实例。
         2. 该函数接受一个字典或对象(实例)`from_`，并根据 `from_` 和 `to` 之间的属性交集构造 `to` 类型的实例。
         3. 它会自动忽略魔术方法、私有属性和受保护属性，确保映射的属性是公开可用的。
 
@@ -228,10 +228,11 @@ class BeanUtil:
         - 如果 `to` 是一个类, 则必须保证创建实例时不包含参数(无参构造), 否则需要通过`init_to_args`, `init_to_kwargs`将构造函数的参数传递进来进行实例化
 
         Args:
-            from_ (T): 源对象，可以是字典或对象实例。
-            to (type[U]): 目标类型, 目前支持 `普通python class`、`dict`、`字典字面量`。
-            deep_clone(bool): 是否以深克隆的方式将from中的属性复制到to, 默认值为false
-            convert(bool): 是否在to_bean过程中根据to的类型注解自动转换类型. 详细见 `set_attr`方法
+            from        : 源对象，可以是字典或对象实例。
+            to          : 目标类型,
+                            - 目前支持: 任意class、dict、字典字面量。
+            deep_clone  : 是否以深克隆的方式将from中的属性复制到to, 默认值为 False
+            convert     : 是否在to_bean过程中根据to的类型注解自动转换类型. 详细见 `set_attr`方法
 
         Returns:
             U: `to` 类型的实例或字典，包含来自 `from_` 的值。

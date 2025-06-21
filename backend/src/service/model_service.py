@@ -1,12 +1,10 @@
 import peewee
 from .base_service import BaseService
 from src.service.log_service import LogService
-from src.util.bean_util import BeanUtil
 from typing import Literal, Any
 from typing_extensions import override
 from src.llm.qwen_plus_latest import QwenPlus, RequestParams as QwenPlusRequestParams
 from src.domain.model.model_config import ModeConfigModel, ModelConfigStatus
-from src.controller import Pagination
 from src.service.db_service import DBService
 from src.llm.base_llm import BaseLLM
 
@@ -52,7 +50,7 @@ class ModelService(BaseService):
         ]
 
         if model_name is not None:
-            where_query.append(ModeConfigModel.model_name.contains(model_name))
+            where_query.append(ModeConfigModel.model_name.contains(model_name)) # type: ignore
 
         if model_status is not None:
             where_query.append(ModeConfigModel.status == model_status)

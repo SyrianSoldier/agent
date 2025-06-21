@@ -34,14 +34,14 @@
           </el-button>
         </div>
 
-        <!-- 聊天历史列表 -->
+        <!-- 聊天会话列表 -->
         <div class="chat-history" v-show="!isSidebarCollapsed">
           <el-scrollbar height="calc(100vh - 180px)">
             <el-menu :default-active="activeChat" @select="handleSelectChat">
               <el-menu-item
-                v-for="chat in chats"
+                v-for="(chat, index) in messages"
                 :key="chat.id"
-                :index="chat.id"
+                :index="chat.id || index"
               >
                 <template #title>
                   <span>{{ chat.title }}</span>
@@ -134,9 +134,11 @@
               <div class="welcome-content">
                 <div class="welcome-header">
                   <h3>我是 DeepSeek，很高兴见到你！</h3>
-                  <p>我可以帮你呵护你，这次我、写作者的创意内容，请把你的任务交给同学。</p>
+                  <p>
+                    我可以帮你呵护你，这次我、写作者的创意内容，请把你的任务交给同学。
+                  </p>
                 </div>
-                
+
                 <!-- 中间的输入框 -->
                 <div class="chat-input">
                   <div class="input-container middle">
@@ -152,18 +154,30 @@
                     />
                     <div class="input-footer">
                       <div class="input-actions-left">
-                        <el-button type="text" :icon="MagicStick" class="action-btn round">
+                        <el-button
+                          type="text"
+                          :icon="MagicStick"
+                          class="action-btn round"
+                        >
                           深度思考 (R1)
                         </el-button>
-                        <el-button type="text" :icon="Connection" class="action-btn round">
+                        <el-button
+                          type="text"
+                          :icon="Connection"
+                          class="action-btn round"
+                        >
                           联网搜索
                         </el-button>
                       </div>
                       <div class="input-actions-right">
-                        <el-button type="text" :icon="Upload" class="action-btn" />
-                        <el-button 
-                          type="primary" 
-                          :icon="Promotion" 
+                        <el-button
+                          type="text"
+                          :icon="Upload"
+                          class="action-btn"
+                        />
+                        <el-button
+                          type="primary"
+                          :icon="Promotion"
                           @click="handleSendMessage"
                           :disabled="!newMessage.trim()"
                           class="send-btn"
@@ -173,25 +187,27 @@
                     </div>
                     <div class="ai-tip">内容由 AI 生成，请仔细甄别</div>
                   </div>
-                </div> 
+                </div>
               </div>
             </div>
 
             <div
-              v-for="message in currentMessages"
+              v-for="message in messages"
               :key="message.id"
               class="message"
               :class="{
-                user: message.sender === 'user',
-                ai: message.sender === 'ai',
+                user: message.role === 'USER',
+                ai: message.role === 'ASSISTANT',
               }"
             >
               <div class="avatar">
-                <el-avatar :icon="message.sender === 'user' ? User : ChatLineRound" />
+                <el-avatar
+                  :icon="message.role === 'USER' ? User : ChatLineRound"
+                />
               </div>
               <div class="message-content">
-                <div class="text">{{ message.text }}</div>
-                <div class="message-time">{{ formatTime(message.time) }}</div>
+                <div class="text">{{ message.content }}</div>
+                <div class="message-time">{{ message.gmt_modified }}</div>
               </div>
             </div>
           </el-scrollbar>
@@ -212,18 +228,26 @@
             />
             <div class="input-footer">
               <div class="input-actions-left">
-                <el-button type="text" :icon="MagicStick" class="action-btn round">
+                <el-button
+                  type="text"
+                  :icon="MagicStick"
+                  class="action-btn round"
+                >
                   深度思考 (R1)
                 </el-button>
-                <el-button type="text" :icon="Connection" class="action-btn round">
+                <el-button
+                  type="text"
+                  :icon="Connection"
+                  class="action-btn round"
+                >
                   联网搜索
                 </el-button>
               </div>
               <div class="input-actions-right">
                 <el-button type="text" :icon="Upload" class="action-btn" />
-                <el-button 
-                  type="primary" 
-                  :icon="Promotion" 
+                <el-button
+                  type="primary"
+                  :icon="Promotion"
                   @click="handleSendMessage"
                   :disabled="!newMessage.trim()"
                   class="send-btn"
@@ -238,9 +262,9 @@
     </main>
   </div>
 </template>
-<!-- 111 -->
-<script setup>
-import { ref, computed, onMounted, nextTick } from "vue";
+
+<script setup lang="ts">
+import { ref, computed, onMounted, nextTick, onUnmounted,reactive, watch } from "vue";
 import {
   Fold,
   Expand,
@@ -252,28 +276,26 @@ import {
   MagicStick,
   Connection,
   Upload,
+  Message,
 } from "@element-plus/icons-vue";
+import {  ChatWebSocketBaseURL } from "@/constants"
+import { create_chat_session } from "@/api/chatSession"
+import { type ChatMessage } from "./type"
+import { isArray } from "element-plus/es/utils";
 
-const showWelcomeScreen = ref(true); // 控制欢迎页面显示
-const isSidebarCollapsed = ref(true); // 侧边栏默认收起
+const showWelcomeScreen = ref(true) // 控制欢迎页面显示
+const isSidebarCollapsed = ref(true) // 侧边栏默认收起
 
-const chats = ref([
-  {
-    id: "1",
-    title: "示例对话",
-    messages: [
-      {
-        id: 1,
-        sender: "ai",
-        text: "你好！我是AI助手，有什么可以帮您的吗？",
-        time: new Date(Date.now() - 60000),
-      },
-    ],
-  },
-]);
-
-const activeChat = ref("1");
-const newMessage = ref("");
+// websocket相关状态
+const messages = ref<ChatMessage[]>([])
+const socket = ref<WebSocket | null>(null)
+const isConnected = ref(false)
+const isPulledHistory = ref(false) 
+const chatContainer = ref<HTMLElement | null>(null)
+const currentSession = reactive<{uuid?: string}>({})
+const currentModelName = ref<string | null> ("qwq-plus-latest") // 先默认用qwq-plus-latest, 后面出个下拉框改
+const newMessage = ref("")
+const activeChat = ref("1")
 const messagesScrollbar = ref(null);
 const editingTitle = ref("");
 const editingChatId = ref(null);
@@ -283,18 +305,148 @@ const isEditingMainTitle = ref(false);
 const currentChatTitleEdit = ref("");
 const mainTitleInput = ref(null);
 
-// 计算属性
-// 获取当前对话内容的标题
-const currentChatTitle = computed(() => {
-  const chat = chats.value.find((c) => c.id === activeChat.value);
-  return chat ? chat.title : "";
-});
-// 获取当前对话内容
-const currentMessages = computed(() => {
-  const chat = chats.value.find((c) => c.id === activeChat.value);
-  return chat ? chat.messages : [];
-});
 
+// 创建会话
+const createSession = async () => { 
+  try {
+    // TODO. 暂时新session的Title用原文字
+    const sessionTitle = newMessage.value.trim() 
+    const res = await create_chat_session(sessionTitle)
+    currentSession.uuid = res.data.uuid
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+// 创建ws连接
+const connectChatWebsocket = (sessionUuid: string) => {
+  if (isConnected.value) {
+    return
+  }
+
+  const params = `?session_uuid=${sessionUuid}`
+  socket.value = new WebSocket(ChatWebSocketBaseURL + "/api/chat" + params)
+
+  socket.value.onopen = () => {
+    isConnected.value = true
+    console.log("The websocket has been opened with session:", sessionUuid)
+  }
+
+  socket.value.onclose = () => {
+    isConnected.value = false
+    console.log("The websocket has been closed with session:", sessionUuid)
+  }
+
+  socket.value.onerror = (error) => {
+    console.error('WebSocket error:', error);
+  }
+
+  socket.value.onmessage = (event) => {
+    let message: any
+    let isHistoryMessage = false
+
+    try {
+      // 历史消息是数组
+      message = JSON.parse(event.data) 
+      if (Array.isArray(message)) { 
+        isHistoryMessage = true
+      }
+    } catch { 
+      // ai回复是字符串
+      message = event.data
+      isHistoryMessage = false
+    }
+
+    console.log(message)
+
+    if (isHistoryMessage) {
+      // 处理历史消息
+      console.log("history message:", message)
+
+      const historyMessages: ChatMessage[] = message
+      messages.value = [...historyMessages]
+
+      isPulledHistory.value = true
+    } else {
+      // 处理普通消息
+      const messageChunk: string = message
+
+      // 处理ai分块消息
+      if (messageChunk === "[CHUNK START]") {
+        messages.value.push({
+          role: 'ASSISTANT',
+          content: message.content,
+          gmt_modified: new Date().toISOString()
+        })
+      } else {
+        const lastMessage = messages.value.at(-1)
+        lastMessage && (lastMessage.content += messageChunk)
+      }
+    }
+
+  }
+}
+
+// 断开ws连接
+const disconnectChatWebsocket = () => {
+  if (socket.value && isConnected.value) {
+    socket.value.close()
+  }
+}
+
+// 发送信息给ai
+const chatWithAi = () => {
+  const params = {
+    model_name: currentModelName.value,
+    request_params: {
+      api_key: localStorage.getItem("api_key")
+    },
+    messages: newMessage.value.trim()
+  }
+
+  socket.value?.send(JSON.stringify(params))
+}
+
+// 等待ws连接
+const waitForWebSocketConnection = () => {
+  return new Promise<void>((resolve, reject) => {
+    const checkConnection = () => {
+      // 等待连接和拉取历史消息
+      if (isConnected.value && isPulledHistory.value) {
+        resolve()
+      } else {
+        setTimeout(checkConnection, 10)
+      }
+    }
+
+    setTimeout(() => reject("WebSocket connection timeout"), 5000)
+    checkConnection()
+  })
+}
+
+// 发送信息按钮
+const handleSendMessage = async () => {
+  if (!newMessage.value.trim()) return
+  
+  // 隐藏聊天页面
+  showWelcomeScreen.value = false
+
+  // 如果当前会话不存在,创建新会话
+  if (!currentSession.uuid) {
+    await createSession()
+  }
+  
+  await waitForWebSocketConnection() // Fix: 直接chatWithAi会出现websocket未连接
+
+  // 视图添加消息
+  messages.value.push({
+      role: 'USER',
+      content: newMessage.value.trim(),
+      gmt_modified: new Date().toISOString()
+  })
+  
+  chatWithAi()
+}
 
 //  handleNewChat 创建新聊天
 const handleNewChat = () => {
@@ -302,17 +454,18 @@ const handleNewChat = () => {
   chats.value.unshift({
     id: newId,
     title: `新聊天 ${chats.value.length + 1}`,
-    messages: []
+    messages: [],
   });
   activeChat.value = newId;
   // scrollToBottom();
   showWelcomeScreen.value = false;
-};
+}
 const handleSelectChat = (chatId) => {
   activeChat.value = chatId;
   showWelcomeScreen.value = false;
-  scrollToBottom(); 
-};
+  scrollToBottom();
+}
+
 //  deleteChat 删除聊天
 const deleteChat = (chatId) => {
   const index = chats.value.findIndex((c) => c.id === chatId);
@@ -325,7 +478,6 @@ const deleteChat = (chatId) => {
     }
   }
 };
-
 
 const setTitleInputRef = (chatId, el) => {
   if (el) {
@@ -359,11 +511,13 @@ const confirmEditTitle = () => {
     titlePopoverVisible.value[editingChatId.value] = false;
     editingChatId.value = null;
   }
-};
+}
+
 // 取消编辑
 const cancelEditTitle = (chatId) => {
   titlePopoverVisible.value[chatId] = false;
-};
+}
+
 // 编辑大标题
 const startEditingMainTitle = () => {
   isEditingMainTitle.value = true;
@@ -373,7 +527,8 @@ const startEditingMainTitle = () => {
       mainTitleInput.value.focus();
     }
   });
-};
+}
+
 //  saveMainTitle 保存大标题
 const saveMainTitle = () => {
   const chat = chats.value.find((c) => c.id === activeChat.value);
@@ -381,59 +536,8 @@ const saveMainTitle = () => {
     chat.title = currentChatTitleEdit.value.trim();
   }
   isEditingMainTitle.value = false;
-};
-// handleSendMessage 发送消息
-const handleSendMessage = () => {
-  if (!newMessage.value.trim()) return;
+}
 
-   // 如果是第一次发送消息
-   if (showWelcomeScreen.value) {
-    showWelcomeScreen.value = false;
-    if (chats.value.length === 0) {
-      handleNewChat();
-    }
-  }
-
-  const userMessage = {
-    id: Date.now(),
-    sender: "user",
-    text: newMessage.value,
-    time: new Date(),
-  };
-
-  const chat = chats.value.find((c) => c.id === activeChat.value);
-  if (chat) {
-    chat.messages.push(userMessage);
-  }
-
-  newMessage.value = "";
-  scrollToBottom();
-
-  // AI自动回复
-  setTimeout(() => {
-    const aiResponses = [
-      "系统繁忙，请稍后重试...",
-      "很抱歉，我无法回答这个问题。",
-      "你真棒！！！"
-    ];
-
-    const randomResponse =
-      aiResponses[Math.floor(Math.random() * aiResponses.length)];
-
-    const aiMessage = {
-      id: Date.now() + 1,
-      sender: "ai",
-      text: randomResponse,
-      time: new Date(),
-    };
-
-    if (chat) {
-      chat.messages.push(aiMessage);
-    }
-
-    scrollToBottom();
-  }, 1000);
-};
 
 const scrollToBottom = () => {
   nextTick(() => {
@@ -441,25 +545,32 @@ const scrollToBottom = () => {
       messagesScrollbar.value.setScrollTop(99999);
     }
   });
-};
+}
 
-const formatTime = (date) => {
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-};
 
 // 侧边栏状态
 // const isSidebarCollapsed = ref(false);
 const toggleSidebar = () => {
   isSidebarCollapsed.value = !isSidebarCollapsed.value;
-};
+}
 
-// 初始化
+// 监听当前会话, 如果更换会话, 断开老连接,
+watch(() => currentSession.uuid, (newVal, oldVal) => {
+  if (newVal && newVal !== oldVal) {
+    if (socket.value && isConnected.value) {
+      disconnectChatWebsocket()
+    }
+    connectChatWebsocket(newVal)
+  }
+})
+
 onMounted(() => {
-  showWelcomeScreen.value = true;
-  isSidebarCollapsed.value = true;
-  chats.value = [];
-});
+  console.log("mounted")
+})
 
+onUnmounted(() => { 
+  disconnectChatWebsocket()
+})
 </script>
 
 <style scoped lang="scss">
@@ -614,11 +725,11 @@ onMounted(() => {
   background-color: #fff;
   overflow: hidden;
   position: relative;
-  
+
   &.collapsed {
     margin-left: 70px;
   }
-  
+
   .chat-container {
     height: 100%;
     display: flex;
@@ -737,7 +848,7 @@ onMounted(() => {
     max-width: 900px;
     margin: 0 auto;
     background-color: #fff;
-    
+
     &.middle {
       width: 700px;
       margin: 0 auto;
@@ -776,7 +887,7 @@ onMounted(() => {
         &:hover {
           color: #409eff;
         }
-        
+
         &.round {
           border-radius: 20px;
         }
@@ -833,13 +944,13 @@ onMounted(() => {
 
 .welcome-header {
   margin-bottom: 40px;
-  
+
   h3 {
     font-size: 24px;
     margin-bottom: 16px;
     color: #333;
   }
-  
+
   p {
     font-size: 16px;
     color: #666;

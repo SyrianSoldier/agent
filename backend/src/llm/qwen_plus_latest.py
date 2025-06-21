@@ -6,8 +6,7 @@ import dashscope
 from langchain_core.outputs import GenerationChunk
 from langchain_core.callbacks.manager import CallbackManagerForLLMRun
 from langchain_core.prompts import ChatPromptTemplate
-from typing import Any, Iterator, Never, override, cast
-from src.util.json_util import JsonUtil
+from typing import Any, Iterator, override, cast
 
 @dataclass
 class RequestParams(BaseRequestParams):
@@ -30,11 +29,6 @@ class QwenPlus(BaseLLM[RequestParams]):
     @override
     def _call(
         self,
-        # prompt 应该是一个message数组字符串
-        # [
-        #     {'role': 'system', 'content': 'You are a helpful assistant.'},
-        #     {'role': 'user', 'content': prompt}
-        # ]
         prompt: str,
         stop: list[str]|None = None,
         run_manager: CallbackManagerForLLMRun|None = None,
@@ -48,7 +42,10 @@ class QwenPlus(BaseLLM[RequestParams]):
 
         response = dashscope.Generation.call(**{
             **asdict(self.request_params),
-            "messages": JsonUtil.loads(prompt)
+            "messages": [
+                {"role": "user", "content": prompt},
+                {'role': 'system', 'content': 'You are a helpful assistant.'}
+            ]
         })
         return cast(str, response.output.choices[0].message.content)
 
@@ -56,11 +53,6 @@ class QwenPlus(BaseLLM[RequestParams]):
     @override
     def _stream(
         self,
-        # prompt 应该是一个message数组字符串
-        # [
-        #     {'role': 'system', 'content': 'You are a helpful assistant.'},
-        #     {'role': 'user', 'content': prompt}
-        # ]
         prompt: str,
         stop: list[str]|None = None,
         run_manager: CallbackManagerForLLMRun|None = None,
@@ -71,7 +63,10 @@ class QwenPlus(BaseLLM[RequestParams]):
 
         responses = dashscope.Generation.call(**{
             **asdict(self.request_params),
-            "messages": JsonUtil.loads(prompt)
+            "messages": [
+                {"role": "user", "content": prompt},
+                {'role': 'system', 'content': 'You are a helpful assistant.'}
+            ]
         })
 
         for response in responses:
